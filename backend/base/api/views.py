@@ -1403,13 +1403,14 @@ def upd_org_settings(request, id):
         org_settings_view.created_by = data["created_by"]
     if org_settings_view.last_updated_by != data["last_updated_by"]:
         org_settings_view.last_updated_by = data["last_updated_by"]
-
+    print("flag", flag)
     if flag == False:
         return Response(
             {"number_format_decimals": "Number Format Decimals is required"},
             status=status.HTTP_400_BAD_REQUEST,
         )
     else:
+        print("saved---")
         org_settings_view.save()
         serializer = org_settings_serializer(org_settings_view)
         return Response(serializer.data)
