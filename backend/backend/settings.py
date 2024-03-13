@@ -241,12 +241,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # TO store image files in Reacr folder
 # Store image in local
-CLIENT_MEDIA_PATH = '../frontend/public/Assets/master'
-MEDIA_ROOT = os.path.join(BASE_DIR, CLIENT_MEDIA_PATH)
+# CLIENT_MEDIA_PATH = '../frontend/public/Assets/master'
+# MEDIA_ROOT = os.path.join(BASE_DIR, CLIENT_MEDIA_PATH)
 
 # Store image in server
-# SERVER_MEDIA_PATH = 'C:/Arun/POC/scorecard_build_folder/build/Assets/master'
-# MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
+SERVER_MEDIA_PATH = '../../images'
+MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'C:/Arun/POC/scorecard_build_folder/build/Assets/master')
 
