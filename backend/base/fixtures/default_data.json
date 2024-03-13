@@ -5715,6 +5715,7 @@
             "is_active": true
         }
     },
+    
     {
         "model": "base.config_codes",
         "pk": 11,
@@ -5737,6 +5738,21 @@
             "config_type": "Measure",
             "config_code": "Boolean",
             "config_value": "Boolean",
+            "created_by": 1,
+            "created_date": "2023-01-09T11:00:57.616790",
+            "last_updated_by": 1,
+            "last_updated_date": "2023-01-09T11:00:57.616790",
+            "delete_flag": "N",
+            "is_active": true
+        }
+    },
+    {
+        "model": "base.config_codes",
+        "pk": 10,
+        "fields": {
+            "config_type": "Measure",
+            "config_code": "Date",
+            "config_value": "Date",
             "created_by": 1,
             "created_date": "2023-01-09T11:00:57.616790",
             "last_updated_by": 1,
@@ -6232,6 +6248,21 @@
             "config_type": "Application Title",
             "config_code": "Application Title",
             "config_value": "Application Title",
+            "created_by": 1,
+            "created_date": "2023-01-09T11:00:57.616790",
+            "last_updated_by": 1,
+            "last_updated_date": "2023-01-09T11:00:57.616790",
+            "delete_flag": "N",
+            "is_active": true
+        }
+    },
+    {
+        "model": "base.config_codes",
+        "pk": 10,
+        "fields": {
+            "config_type": "Activity Config Details",
+            "config_code": "Past notification display(Days)",
+            "config_value": "100",
             "created_by": 1,
             "created_date": "2023-01-09T11:00:57.616790",
             "last_updated_by": 1,

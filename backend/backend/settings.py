@@ -233,6 +233,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.1.100:3000",
     "http://54.236.159.103:8443",
     "http://184.72.84.162:3000"
+    "http://13.201.143.57"
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -240,12 +241,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # TO store image files in Reacr folder
 # Store image in local
-# CLIENT_MEDIA_PATH = '../frontend/public/Assets/master'
-# MEDIA_ROOT = os.path.join(BASE_DIR, CLIENT_MEDIA_PATH)
+CLIENT_MEDIA_PATH = '../frontend/public/Assets/master'
+MEDIA_ROOT = os.path.join(BASE_DIR, CLIENT_MEDIA_PATH)
 
 # Store image in server
-SERVER_MEDIA_PATH = '../../images'
-MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
+# SERVER_MEDIA_PATH = 'C:/Arun/POC/scorecard_build_folder/build/Assets/master'
+# MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'C:/Arun/POC/scorecard_build_folder/build/Assets/master')
 

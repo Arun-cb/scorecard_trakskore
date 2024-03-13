@@ -339,7 +339,7 @@ urlpatterns = [
     path("scorecard_description/", search_scorecard_description.as_view()),
     path("get_scorecard_details_yet_kpi/<int:id>/", views.get_scorecard_details_yet_kpi),
     path(
-        "search_scorecard_description/<str:sdname>/", views.filter_scorecard_description
+        "search_scorecard_description/<int:id>/", views.filter_scorecard_description
     ),
     #  smtp
     path("get_smtp", views.get_smtp),
@@ -416,22 +416,47 @@ urlpatterns = [
     path("get_connected_tables",rb_views.fnGetTableData),
     path("display_columns",rb_views.rb_sql_show_columns),
     path("ins_save_connection_data",rb_views.fnStoreQueryNameConnectionData),
+    path("upd_connection_data/<int:id>/", rb_views.fnUpdateQueryNameConnectionData),
     path("get_connection_data",rb_views.fnGetQueryDefinition),
+    path("get_connection_data/<int:id>/",rb_views.fnGetQueryDefinition),
+    path("get_range_query_definition/<int:start>/<int:end>/<str:created_user>/", rb_views.get_range_query_definition),
+    path("get_range_query_definition/<int:start>/<int:end>/<str:created_by>/<str:search>/", rb_views.get_range_query_definition),
+
+    # ? Shared Query URLS
+    path("ins_shared_query_definition",rb_views.ins_shared_query_definition),
+    path("upd_shared_query_definition/<int:id>/", rb_views.upd_shared_query_definition),
+    path("get_shared_query_definition",rb_views.get_shared_query_definition),
+    path("get_shared_query_definition/<int:id>/",rb_views.get_shared_query_definition),
+    path("get_range_shared_query_definition/<int:start>/<int:end>/<str:permission_to>/", rb_views.get_range_shared_query_definition),
+    path("get_range_shared_query_definition/<int:start>/<int:end>/<str:permission_to>/<str:search>/", rb_views.get_range_shared_query_definition),
+    
+    
     path("ins_save_table_data",rb_views.fnsaveSelectedTables),
     path("get_save_table_data",rb_views.fnGetQueryBuilderTable),
+    path("get_save_table_data/<int:id>/",rb_views.fnGetQueryBuilderTable),
+    
     path("ins_save_column_data",rb_views.fnsaveSelectedColumn),
     path("get_save_column_data",rb_views.fngetsavedcolumns),
-    path("ins_save_join_table_data",rb_views.fninsjointablesave),
-    path("get_join_table_data",rb_views.fnGetJoinTableColumnData),
+    path("get_save_column_data/<int:id>/",rb_views.fngetsavedcolumns),
     
+
     path("ins_alias_table_data",rb_views.fn_ins_column_alias),
     path("get_alias_table_data",rb_views.fn_get_column_alias),
     
     
     path("ins_aggregate_table_data",rb_views.fn_ins_column_aggregate),
     path("get_aggregate_table_data",rb_views.fn_get_column_aggregate),
+    path("get_aggregate_table_data/<int:id>/",rb_views.fn_get_column_aggregate),
+
+    path("ins_save_join_table_data",rb_views.fninsjointablesave),
+    path("get_join_table_data",rb_views.fnGetJoinTableColumnData),
+    path("get_join_table_data/<int:id>/",rb_views.fnGetJoinTableColumnData),
     
     path("get_execute_query_data",rb_views.fnpostquerytoexecute),
     
-     
+    
+    path("ins_query_column_data",rb_views.fn_ins_query_column_data),
+
+    path("get_query_result",rb_views.fnGetQueryResult),
+        
 ]

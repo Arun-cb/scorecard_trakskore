@@ -311,7 +311,6 @@ def get_user_groups(request, id=0):
             #     ).filter(id=id)
             #     for group in Group.objects.all()
             # }
-            print("group_user_dict----------------", group_user_dict)
         act_json = []
         for i in group_user_dict:
             temp = ConvertQuerysetToJson(Group.objects.filter(id=i))
@@ -1372,7 +1371,7 @@ def upd_org_settings(request, id):
     data = request.data
 
     if len(org_settings_view.logo) > 0 and org_settings_view.logo != data["logo"]:
-        # print("path", org_settings_view.logo.path)
+        print("path", org_settings_view.logo.path)
         os.remove(org_settings_view.logo.path)
 
     flag = True
@@ -1403,14 +1402,13 @@ def upd_org_settings(request, id):
         org_settings_view.created_by = data["created_by"]
     if org_settings_view.last_updated_by != data["last_updated_by"]:
         org_settings_view.last_updated_by = data["last_updated_by"]
-    print("flag", flag)
+
     if flag == False:
         return Response(
             {"number_format_decimals": "Number Format Decimals is required"},
             status=status.HTTP_400_BAD_REQUEST,
         )
     else:
-        print("saved---")
         org_settings_view.save()
         serializer = org_settings_serializer(org_settings_view)
         return Response(serializer.data)
@@ -2123,7 +2121,7 @@ def ins_config_codes(request):
     
     all_serializer_fields = list(serializer.fields.keys())
 
-    print("all_serializer_fields",all_serializer_fields)
+    # print("all_serializer_fields",all_serializer_fields)
 
     # Fields to exclude
     fields_to_exclude = ['id', 'created_by', 'last_updated_by', 'created_date']
@@ -2155,6 +2153,11 @@ def ins_config_codes(request):
         # print("e_msg", e_msg, "length", len(e_msg))
         # print("e_field", e_field, "length", len(e_field))
 
+        index_to_replace = e_field.index('non_field_errors')
+
+        # Replace 'non_field_errors' with 'config_codes'
+        e_field[index_to_replace] = 'config_code'
+        
         # Remove the excluded fields from the list of field names
         non_e_field = [for_field for for_field in required_serializer_fields if for_field not in e_field]
 
@@ -2211,7 +2214,7 @@ def ins_config_codes(request):
         ordered_data = order_data(data)
 
         # Print the ordered data
-        # print("ordered_data",ordered_data)
+        print("ordered_data",ordered_data)
 
         return Response(ordered_data, status=status.HTTP_404_NOT_FOUND)
 
@@ -5371,8 +5374,9 @@ class search_scorecard_description(generics.ListAPIView):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def filter_scorecard_description(request, sdname=""):
-    org = scorecard.objects.filter(scorecard_description=sdname, delete_flag="N")
+def filter_scorecard_description(request, id):
+    org = scorecard.objects.filter(id=id, delete_flag="N")
+    print("org",org)
     serializer = scorecard_serializer(org, many=True)
     return Response(serializer.data)
 
@@ -6605,7 +6609,7 @@ def get_user_profile(request, id=0):
         user = user_profile.objects.filter(user_id=id)
 
     serializer = user_profile_serializer(user, many=True)
-    print("data",serializer.data)
+    
     return Response(serializer.data)
 
 

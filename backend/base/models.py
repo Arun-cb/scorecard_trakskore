@@ -993,15 +993,35 @@ class query_definition(models.Model):
     id = models.AutoField(primary_key=True)
     query_name = models.CharField(max_length=255, null=False, blank=False)
     connection_id = models.ForeignKey(rb_db_connect_table,null=False,blank=False,db_column="connection_id",on_delete=models.CASCADE)
-    query_text = models.CharField(max_length=255, null=False, blank=False)
+    query_text = models.TextField(null=False, blank=False)
+    created_user = models.CharField(max_length=255, null=False, blank=False)
     created_by = models.IntegerField(null=False, blank=False)
     created_date = models.DateTimeField(auto_now_add=True)
     last_updated_by = models.IntegerField(null=False, blank=False)
     last_updated_date = models.DateTimeField(auto_now=True)
     delete_flag = models.CharField(max_length=1, null=False, blank=False, default='N')
+    query_status = models.BooleanField(default=False)
+    query_type = models.BooleanField(default=False)
 
     class Meta:
         db_table = "tb_sqb_query_definition"
+    
+
+# Shared Query Definition
+class shared_query_definition(models.Model):
+    id = models.AutoField(primary_key=True)
+    permission_to = models.CharField(max_length=255, null=False, blank=False)
+    permission_by = models.CharField(max_length=255, null=False, blank=False)
+    permission_type = models.CharField(max_length=255, null=False, blank=False)
+    query_id = models.IntegerField(null=False, blank=False)
+    created_by = models.IntegerField(null=False, blank=False)
+    created_date = models.DateTimeField(auto_now_add=True)
+    last_updated_by = models.IntegerField(null=False, blank=False)
+    last_updated_date = models.DateTimeField(auto_now=True)
+    delete_flag = models.CharField(max_length=1, null=False, blank=False, default='N')
+    
+    class Meta:
+        db_table = "tb_sqb_shared_query_definition"
 
 # Query Builder Table
 
@@ -1025,6 +1045,7 @@ class query_builder_table(models.Model):
 class query_builder_table_columns(models.Model):
     id = models.AutoField(primary_key=True)
     column_name = models.CharField(max_length=255,null=True, blank=False)
+    alias_name = models.CharField(max_length=255, null=True, blank=False)
     sort_type = models.CharField(max_length=255, null=True, blank=True)
     sort_order = models.IntegerField(null=True, blank=True)
     sort_column = models.CharField(max_length=255, null=True, blank=True)

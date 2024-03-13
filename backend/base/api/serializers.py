@@ -620,6 +620,11 @@ class qb_defnition_serializer(serializers.ModelSerializer):
         model = query_definition
         fields = '__all__'
 
+class shared_query_definition_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = shared_query_definition
+        fields = '__all__'
+
 class qb_table_serializer(serializers.ModelSerializer):
     class Meta:
         model = query_builder_table
@@ -684,3 +689,4 @@ class scorecard_details_yet_kpi_serializer(serializers.ModelSerializer):
     class Meta:
         model = kpi_details
         fields = ['id','kpi','scorecard_id','scorecard_details_id','perspective_id','objective_id','created_by', 'last_updated_by']
+        
