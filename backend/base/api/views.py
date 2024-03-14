@@ -2230,8 +2230,6 @@ def upd_config_codes(request, id):
     
     all_serializer_fields = list(serializer.fields.keys())
 
-    print("all_serializer_fields",all_serializer_fields)
-
     # Fields to exclude
     fields_to_exclude = ['id', 'created_by', 'last_updated_by', 'created_date']
 
@@ -2245,7 +2243,7 @@ def upd_config_codes(request, id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         error_data = serializer.errors
-        # print("error_data", error_data, len(error_data))
+        print("error_data", error_data)
         e_code = []
         e_msg = []
         e_field = []
