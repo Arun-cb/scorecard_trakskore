@@ -150,9 +150,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "scorecard",
-        "USER": "cittabase",
+        "USER": "root",
         "PASSWORD": "Citta@#@!",
-        "HOST": "13.126.97.230",
+        "HOST": "13.127.215.127",
         "PORT": "3306"
     }
 }
