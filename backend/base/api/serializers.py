@@ -106,7 +106,7 @@ class auth_group_serializer(serializers.ModelSerializer):
 class org_definition_serializer(serializers.ModelSerializer):
     class Meta:
         model = org_definition
-        fields = ('id', 'organization_name', 'address_1', 'address_2', 'city', 'country',
+        fields = ('id', 'organization_name', 'address_1', 'address_2', 'city', 'country','state',
                   'no_of_org_functional_levels', 'created_by', 'last_updated_by', 'delete_flag')
 
 # Stop Light Indicators
@@ -689,4 +689,14 @@ class scorecard_details_yet_kpi_serializer(serializers.ModelSerializer):
     class Meta:
         model = kpi_details
         fields = ['id','kpi','scorecard_id','scorecard_details_id','perspective_id','objective_id','created_by', 'last_updated_by']
-        
+    
+
+class countries_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = countries
+        fields = '__all__'
+
+class state_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = countries
+        fields = '__all__'

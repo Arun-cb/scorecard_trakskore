@@ -151,11 +151,24 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "scorecard",
         "USER": "root",
-        "PASSWORD": "Citta@#@!",
-        "HOST": "13.127.215.127",
+        "PASSWORD": "",
+        "HOST": "43.204.179.106",
         "PORT": "3306"
     }
 }
+
+
+# backup
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "mysql",
+#         "USER": "root",
+#         "PASSWORD": "Citta@#@!",
+#         "HOST": "13.127.215.127",
+#         "PORT": "3306"
+#     }
+# }
 
 
 
