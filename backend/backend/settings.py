@@ -134,28 +134,28 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "score_card",
-        "USER": "root",
-        "PASSWORD": "",
-        "HOST": "localhost",
-        "PORT": "3306"
-    }
-}
-
-# AWS server database
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.mysql",
-#         "NAME": "scorecard",
+#         "NAME": "score_card",
 #         "USER": "root",
 #         "PASSWORD": "",
-#         "HOST": "43.204.179.106",
+#         "HOST": "localhost",
 #         "PORT": "3306"
 #     }
 # }
+
+# AWS server database
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "scorecard",
+        "USER": "root",
+        "PASSWORD": "",
+        "HOST": "43.204.179.106",
+        "PORT": "3306"
+    }
+}
 
 
 # backup
