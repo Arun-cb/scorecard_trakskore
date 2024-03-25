@@ -16,7 +16,6 @@ class org_definition(models.Model):
     address_2 = models.CharField(max_length=300, null=True, blank=True)
     city = models.CharField(max_length=50, null=False, blank=False)
     country = models.CharField(max_length=50, null=False, blank=False)
-    state = models.CharField(max_length=50, null=False, blank=False)
     no_of_org_functional_levels = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)], null=False, blank=False)
     created_by = models.IntegerField(null=False, blank=False)
@@ -71,9 +70,11 @@ class org_functional_level(models.Model):
 
 
 class currencies(models.Model):
-    currency_code = models.CharField(max_length=20, null=False, blank=False)
-    currency_name = models.CharField(max_length=100, null=False, blank=False)
-    sign = models.CharField(max_length=5, null=False, blank=False)
+    currency_code = models.CharField(
+        max_length=3, null=False, blank=False, unique=True)
+    currency_name = models.CharField(
+        max_length=100, null=False, blank=False, unique=True)
+    sign = models.CharField(max_length=5, null=False, blank=False, unique=True)
     created_by = models.IntegerField(null=False, blank=False)
     created_date = models.DateTimeField(auto_now_add=True)
     last_updated_by = models.IntegerField(null=False, blank=False)
@@ -1226,35 +1227,3 @@ class user_profile(models.Model):
         db_table = "tb_sc_user_profile"
 
 
-class countries(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50, null=True, blank=True)
-    iso3 = models.CharField(max_length=10, null=True, blank=True)
-    iso2 = models.CharField(max_length=10, null=True, blank=True)
-    numeric_code = models.CharField(max_length=10, null=True, blank=True)
-    capital = models.CharField(max_length=50, null=True, blank=True)
-    currency = models.CharField(max_length=10, null=True, blank=True)
-    currency_name = models.CharField(max_length=50, null=True, blank=True)
-    currency_symbol = models.CharField(max_length=10, null=True, blank=True)
-    phonecode = models.CharField(max_length=20, null=True, blank=True)
-    region = models.CharField(max_length=20, null=True, blank=True)
-    region_id = models.IntegerField(null=True, blank=True)
-    created_date = models.DateTimeField(auto_now_add=True)
-    last_updated_date = models.DateTimeField(auto_now=True)
-    delete_flag = models.CharField(max_length=1, null=False, blank=False, default='N')
-
-    class Meta:
-        db_table = "tb_sc_countries"
-
-class states(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50, null=True, blank=True)
-    iso2 = models.CharField(max_length=10, null=True, blank=True)
-    country_id = models.ForeignKey(
-        countries, null=False, blank=False, db_column='country_id', on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
-    last_updated_date = models.DateTimeField(auto_now=True)
-    delete_flag = models.CharField(max_length=1, null=False, blank=False, default='N')
-
-    class Meta:
-        db_table = "tb_sc_states"

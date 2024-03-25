@@ -458,8 +458,5 @@ urlpatterns = [
     path("ins_query_column_data",rb_views.fn_ins_query_column_data),
 
     path("get_query_result",rb_views.fnGetQueryResult),
-    path("get_countries",views.get_countries),
-    path("get_state/<int:id>/",views.get_state),
-    path("get_state",views.get_state),
         
 ]
