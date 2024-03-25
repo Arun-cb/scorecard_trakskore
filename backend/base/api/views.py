@@ -36,6 +36,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from django.http import HttpRequest
 from rest_framework.pagination import PageNumberPagination
+import time
 
 import mysql.connector as sqlConnect
 import cx_Oracle
@@ -410,8 +411,6 @@ def upd_user_groups(request):
     user_name = request.data.get("username")
     user_mail = request.data.get("email")
     group_id = request.data.get("group")
-    is_active = request.data.get("is_active")
-    is_active = True if is_active == "true" or "Yes" else False
 
     user = User.objects.get(id=user_id)
     group = Group.objects.get(id=group_id)
@@ -421,8 +420,7 @@ def upd_user_groups(request):
     user.groups.set([group])
     user.email = user_mail
     user.username = user_name
-    user.is_active = is_active
-    print(user,User.objects.filter(username=user_name).exclude(id=user_id))
+    user.is_active = 1 if request.data.get("is_active") else 0
     user.save()
 
     return Response("User Updated successfully", status=status.HTTP_200_OK)
@@ -454,6 +452,7 @@ def ins_org_definition(request):
         "address_2": request.data.get("address_2"),
         "city": request.data.get("city"),
         "country": request.data.get("country"),
+        "state": request.data.get("state"),
         "no_of_org_functional_levels": request.data.get("no_of_org_functional_levels"),
         "created_by": request.data.get("created_by"),
         "last_updated_by": request.data.get("last_updated_by"),
@@ -917,107 +916,105 @@ def del_org_functional_level(request, id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def ins_currencies(request):
-    data = {
-        "currency_code": request.data.get("currency_code"),
-        "currency_name": request.data.get("currency_name"),
-        "sign": request.data.get("sign"),
-        "created_by": request.data.get("created_by"),
-        "last_updated_by": request.data.get("last_updated_by"),
-    }
+    print(request.data)
+    exist = currencies.objects.filter(currency_code=request.data.get("currency"), currency_name=request.data.get("currency_name"), delete_flag='N')
+    print(exist, len(exist))
+    if len(exist) == 0:
+        data = {
+            "currency_code": request.data.get("currency"),
+            "currency_name": request.data.get("currency_name"),
+            "sign": request.data.get("currency_symbol"),
+            "created_by": request.data.get("created_by"),
+            "last_updated_by": request.data.get("last_updated_by"),
+        }
 
-    serializer = currencies_serializer(data=data)
-    all_serializer_fields = list(serializer.fields.keys())
+        serializer = currencies_serializer(data=data)
+        all_serializer_fields = list(serializer.fields.keys())
 
-    # Fields to exclude
-    fields_to_exclude = ['id', 'created_by', 'last_updated_by', 'created_date']
-
-    # Remove the excluded fields from the list of field names
-    required_serializer_fields = [field for field in all_serializer_fields if field not in fields_to_exclude]
-
-    print("required_serializer_fields",required_serializer_fields)
-
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    else:
-        error_data = serializer.errors
-        print("error_data", error_data, len(error_data))
-        e_code = []
-        e_msg = []
-        e_field = []
-        # Iterate over each field's errors
-        for field, error_list in error_data.items():
-            for error_data in error_list:
-                # Access the error code
-                error_code = error_data.code
-                e_code.append(error_code)
-                e_msg.append(error_data)
-                e_field.append(field)
-
-        print("e_code", e_code, "length", len(e_code))
-        print("e_msg", e_msg, "length", len(e_msg))
-        print("e_field", e_field, "length", len(e_field))
+        # Fields to exclude
+        fields_to_exclude = ['id', 'created_by', 'last_updated_by', 'created_date']
 
         # Remove the excluded fields from the list of field names
-        non_e_field = [for_field for for_field in required_serializer_fields if for_field not in e_field]
+        required_serializer_fields = [field for field in all_serializer_fields if field not in fields_to_exclude]
 
-        print("non_e_field",non_e_field)
 
-        data_warning = warnings.objects.filter(
-            error_code__in=e_code, error_from="Server"
-        )
-        serializer_warning = warnings_serializer(data_warning, many=True)
-        # print("serializer_warning length", serializer_warning.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        # ! test validation on Backend level
+        else:
+            error_data = serializer.errors
+            e_code = []
+            e_msg = []
+            e_field = []
+            # Iterate over each field's errors
+            for field, error_list in error_data.items():
+                for error_data in error_list:
+                    # Access the error code
+                    error_code = error_data.code
+                    e_code.append(error_code)
+                    e_msg.append(error_data)
+                    e_field.append(field)
 
-        field_arr = []
-        for iter in range(len(e_code)):
-            for j in serializer_warning.data:
-                print("out : ", e_code[iter], j["error_code"])
-                if e_code[iter] == j["error_code"]:
-                    field_arr.append(
-                        (j["error_msg"]).replace("%1", e_field[iter].replace("_", " "))
-                    )
-                    print("true")
-                    print("j:", j["error_msg"])
-                else:
-                    print("false")
-                    print("i:", e_code[iter])
+            # Remove the excluded fields from the list of field names
+            non_e_field = [for_field for for_field in required_serializer_fields if for_field not in e_field]
 
-        # print("field_arr", field_arr)
+            print("non_e_field",non_e_field)
 
-        data = []
-        for i in range(len(e_code)):
-            # print(f"Error code for field '{field}': {error_code}")
-            # print(f"Errors '{e_field[i]}': {field_arr[i]}")
-            data.append({e_field[i]: [field_arr[i]]})
+            data_warning = warnings.objects.filter(
+                error_code__in=e_code, error_from="Server"
+            )
+            serializer_warning = warnings_serializer(data_warning, many=True)
+            # print("serializer_warning length", serializer_warning.data)
+
+            # ! test validation on Backend level
+
+            field_arr = []
+            for iter in range(len(e_code)):
+                for j in serializer_warning.data:
+                    print("out : ", e_code[iter], j["error_code"])
+                    if e_code[iter] == j["error_code"]:
+                        field_arr.append(
+                            (j["error_msg"]).replace("%1", e_field[iter].replace("_", " "))
+                        )
+                        print("true")
+                        print("j:", j["error_msg"])
+                    else:
+                        print("false")
+                        print("i:", e_code[iter])
+
+            # print("field_arr", field_arr)
+
+            data = []
+            for i in range(len(e_code)):
+                # print(f"Error code for field '{field}': {error_code}")
+                # print(f"Errors '{e_field[i]}': {field_arr[i]}")
+                data.append({e_field[i]: [field_arr[i]]})
+            
+            for i in range(len(non_e_field)):
+                data.append({non_e_field[i]: ''})
+            print("data", data)
+
+            def order_data(data):
+                # Define the desired field order
+                field_order = {
+                    'currency_code': 0,
+                    'currency_name': 1,
+                    'sign': 2,
+                }
+
+                # Sort the data based on the field order
+                sorted_data = sorted(data, key=lambda item: field_order.get(list(item.keys())[0], float('inf')))
+
+                return sorted_data
         
-        for i in range(len(non_e_field)):
-            data.append({non_e_field[i]: ''})
-        print("data", data)
+            # Order the data
+            ordered_data = order_data(data)
 
-        def order_data(data):
-            # Define the desired field order
-            field_order = {
-                'currency_code': 0,
-                'currency_name': 1,
-                'sign': 2,
-            }
-
-            # Sort the data based on the field order
-            sorted_data = sorted(data, key=lambda item: field_order.get(list(item.keys())[0], float('inf')))
-
-            return sorted_data
-    
-        # Order the data
-        ordered_data = order_data(data)
-
-        # Print the ordered data
-        print("ordered_data",ordered_data)
-
-        return Response(ordered_data, status=status.HTTP_400_BAD_REQUEST)
+            # Print the ordered data
+            return Response(ordered_data, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response('Already Exist', status=status.HTTP_200_OK)
 
 
 # Get Currencies
@@ -3828,6 +3825,7 @@ def ins_kpi_actuals(request):
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def upd_kpi_actuals(request, id):
+    start_time = time.time()
     update_actual = request.data
     temp_data = []
 
@@ -3848,6 +3846,7 @@ def upd_kpi_actuals(request, id):
             "created_by": update_actual[i]["created_by"],
             "last_updated_by": update_actual[i]["last_updated_by"],
         }
+        
         if "id" in update_actual[i]:
             item = kpi_actuals.objects.get(id=update_actual[i]["id"])
         else:
@@ -3858,7 +3857,7 @@ def upd_kpi_actuals(request, id):
             )
             if actual_serializer.is_valid():
                 actual_serializer.save()
-                check_actuals()
+                # check_actuals()
                 temp_data.append(actual_serializer)
             else:
                 return Response(
@@ -3869,14 +3868,16 @@ def upd_kpi_actuals(request, id):
             if actual_serializer.is_valid():
                 actual_serializer.save()
                 temp_data.append(actual_serializer)
-                check_actuals()
+                # check_actuals()
 
             else:
-                # print("actual_serializer.error", actual_serializer.errors)
                 return Response(
                     actual_serializer.errors, status=status.HTTP_404_NOT_FOUND
                 )
-
+    print(time.time() - start_time) 
+    # check_actuals()
+        
+    # print(time.time() - start_time)
     return Response(actual_serializer.data, status=status.HTTP_200_OK)
 
 
@@ -4330,16 +4331,11 @@ def check_actuals(id=1):
         kpi_pendings_serializer = temporary_kpi_pending_actions_serializer(
             pendings, many=True
         )
-
         for i in kpi_pendings_serializer.data:
             actuals = kpi_actuals.objects.filter(kpi_id=i["kpi_id"])
             actuals_serializer = kpi_actuals_serializer(actuals, many=True)
 
             for j in actuals_serializer.data:
-                # print("true",datetime.datetime.strptime(j["period"], "%Y-%m-%d").date()
-                #     < datetime.datetime.strptime(
-                #         i["upcoming_date"][0:10], "%Y-%m-%d"
-                #     ).date())
                 if (
                     datetime.datetime.strptime(j["period"], "%Y-%m-%d").date()
                     < datetime.datetime.strptime(
@@ -7355,3 +7351,21 @@ def del_rb_db_connect_table(request, id):
     item.save()
     serializer = rb_db_connect_table_serializer(item)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_countries(request, id=0):
+    if id == 0:
+        country = countries.objects.filter(delete_flag="N")
+    else:
+        country = countries.objects.filter(id=id)
+
+    serializer = countries_serializer(country, many=True)
+    return Response(serializer.data)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_state(request, id=0):
+    state_data = states.objects.filter(country_id=id)
+    serializer = state_serializer(state_data, many=True)
+    return Response(serializer.data)
