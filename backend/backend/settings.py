@@ -274,7 +274,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # SERVER_MEDIA_PATH = 'http://13.201.143.57/Assets/master'
 SERVER_MEDIA_PATH = '/home/ubuntu/images'
-print("MEDIA_ROOT", SERVER_MEDIA_PATH)
+MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'C:/Arun/POC/scorecard_build_folder/build/Assets/master')
 
