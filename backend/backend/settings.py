@@ -258,8 +258,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 # MEDIA_ROOT = os.path.join(BASE_DIR, CLIENT_MEDIA_PATH)
 
 # Store image in server
-SERVER_MEDIA_PATH = '/home/ubuntu/images'
+SERVER_MEDIA_PATH = './Assets/master'
 MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
+print("MEDIA_ROOT", MEDIA_ROOT)
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'C:/Arun/POC/scorecard_build_folder/build/Assets/master')
 
