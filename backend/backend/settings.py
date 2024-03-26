@@ -270,9 +270,10 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # Store image in server
 # SERVER_MEDIA_PATH = '../../../../var/www/html/my-react-app/build/Assets/master'
+# MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
+
 SERVER_MEDIA_PATH = 'http://13.201.143.57/Assets/master'
-MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
-print("MEDIA_ROOT", MEDIA_ROOT)
+print("MEDIA_ROOT", SERVER_MEDIA_PATH)
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'C:/Arun/POC/scorecard_build_folder/build/Assets/master')
 
