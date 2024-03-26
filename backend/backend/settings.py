@@ -258,7 +258,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 # MEDIA_ROOT = os.path.join(BASE_DIR, CLIENT_MEDIA_PATH)
 
 # Store image in server
-SERVER_MEDIA_PATH = '/Assets/master'
+SERVER_MEDIA_PATH = '/var/www/html/my-react-app/build/Assets/master'
 MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
 print("MEDIA_ROOT", MEDIA_ROOT)
 
