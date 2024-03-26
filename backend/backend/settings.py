@@ -150,9 +150,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "scorecard",
-        "USER": "root",
-        "PASSWORD": "",
-        "HOST": "43.204.179.106",
+        "USER": "admin",
+        "PASSWORD": "Citta321",
+        "HOST": "cb-rds-database.cluster-c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
         "PORT": "3306"
     }
 }
@@ -166,6 +166,17 @@ DATABASES = {
 #         "USER": "root",
 #         "PASSWORD": "Citta@#@!",
 #         "HOST": "13.127.215.127",
+#         "PORT": "3306"
+#     }
+# }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "scorecard",
+#         "USER": "root",
+#         "PASSWORD": "",
+#         "HOST": "43.204.179.106",
 #         "PORT": "3306"
 #     }
 # }
