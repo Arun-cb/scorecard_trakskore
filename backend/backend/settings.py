@@ -275,7 +275,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # SERVER_MEDIA_PATH = 'http://13.201.143.57/Assets/master'
 
-
+# For AWS
 SERVER_MEDIA_PATH = '/var/www/html/my-react-app/build/Assets/master'
 MEDIA_ROOT = os.path.join(BASE_DIR, SERVER_MEDIA_PATH)
 
