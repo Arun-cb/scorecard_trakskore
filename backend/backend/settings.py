@@ -146,27 +146,27 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # }
 
 # AWS server database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "scorecard",
-        "USER": "admin",
-        "PASSWORD": "Citta321",
-        "HOST": "cb-rds-database.cluster-c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
-        "PORT": "3306"
-    }
-}
-
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.mysql",
 #         "NAME": "scorecard",
 #         "USER": "admin",
 #         "PASSWORD": "Citta321",
-#         "HOST": "database-1.c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
+#         "HOST": "cb-rds-database.cluster-c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
 #         "PORT": "3306"
 #     }
 # }
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "scorecard",
+        "USER": "admin",
+        "PASSWORD": "Citta321",
+        "HOST": "database-1.c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
+        "PORT": "3306"
+    }
+}
 
 # backup
 # DATABASES = {
