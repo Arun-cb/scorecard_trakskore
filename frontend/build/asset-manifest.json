@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.43bb058b.css",
-    "main.js": "/static/js/main.01ad4953.js",
+    "main.css": "/static/css/main.556e4291.css",
+    "main.js": "/static/js/main.9a0ef0fa.js",
     "static/js/703.946b2703.chunk.js": "/static/js/703.946b2703.chunk.js",
     "static/js/513.47de1737.chunk.js": "/static/js/513.47de1737.chunk.js",
     "static/media/login_bgframe.png": "/static/media/login_bgframe.a5632c11de58ff7ce740.png",
@@ -9,17 +9,15 @@
     "static/media/chart_preview_bg.png": "/static/media/chart_preview_bg.3be2d6d21ea68c482e45.png",
     "static/media/img_user.png": "/static/media/img_user.43b59e598ba15abe6eab.png",
     "static/media/cittabase_logo.png": "/static/media/cittabase_logo.51f158038966df64fc03.png",
-    "static/media/closed_folder.svg": "/static/media/closed_folder.6ba7cf264cca71a2aead.svg",
     "static/media/up-arrow-svgrepo-com.svg": "/static/media/up-arrow-svgrepo-com.c9452b7828b73d1c1284d3c80fd4a457.svg",
-    "static/media/open_folder.svg": "/static/media/open_folder.558741af582e6c413a70.svg",
     "index.html": "/index.html",
-    "main.43bb058b.css.map": "/static/css/main.43bb058b.css.map",
-    "main.01ad4953.js.map": "/static/js/main.01ad4953.js.map",
+    "main.556e4291.css.map": "/static/css/main.556e4291.css.map",
+    "main.9a0ef0fa.js.map": "/static/js/main.9a0ef0fa.js.map",
     "703.946b2703.chunk.js.map": "/static/js/703.946b2703.chunk.js.map",
     "513.47de1737.chunk.js.map": "/static/js/513.47de1737.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.43bb058b.css",
-    "static/js/main.01ad4953.js"
+    "static/css/main.556e4291.css",
+    "static/js/main.9a0ef0fa.js"
   ]
 }

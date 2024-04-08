@@ -187,6 +187,8 @@ urlpatterns = [
     # path('all_user_access_definition',UserAccessViews.as_view()),
     # get auth user details
     path("get_user_details", views.get_user_details),
+    path("get_Prticular_user_details/<int:id>/", views.get_Prticular_user_details),
+
     # join user and user_access_definition
     path("join_user_user_access/<int:id>/", views.user_user_access),
     path("join_user_user_access/<int:id>/<int:menu_id>/", views.user_user_access),

@@ -55,7 +55,7 @@ class org_definition_stop_light_indicators(models.Model):
 
 
 class org_functional_level(models.Model):
-    hierarchy_level = models.IntegerField(null=False, blank=False, unique=True)
+    hierarchy_level = models.IntegerField(null=False, blank=False)
     hierarchy_name = models.CharField(max_length=300, null=False, blank=False)
     created_by = models.IntegerField(null=False, blank=False)
     created_date = models.DateTimeField(auto_now_add=True)
@@ -272,7 +272,7 @@ class perspectives(models.Model):
 class scorecard(models.Model):
     # scorecard_id = models.CharField(max_length=100,null=False, blank=False)
     scorecard_description = models.CharField(
-        max_length=100, null=False, blank=False)
+        max_length=100, null=False, blank=False, unique=True)
     functional_hierarchy_level = models.ForeignKey(
         org_functional_hierarchy, null=False, blank=False, on_delete=models.CASCADE, db_column='functional_level_id'
     )
@@ -673,7 +673,7 @@ class kpi_pending_actions(models.Model):
     kpi = models.CharField(max_length=500, null=False, blank=False)
     message = models.CharField(max_length=500, null=False, blank=False)
     upcoming_date = models.DateTimeField(
-        max_length=500, null=False, blank=False)
+        max_length=500, null=True, blank=True)
     kpi_id = models.IntegerField(null=False, blank=False, default='0')
     action = models.CharField(max_length=20, null=False, blank=False)
     show_flag = models.CharField(
