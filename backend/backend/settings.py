@@ -134,41 +134,43 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.mysql",
-#         "NAME": "score_card",
-#         "USER": "root",
-#         "PASSWORD": "",
-#         "HOST": "localhost",
-#         "PORT": "3306"
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "score_card",
+        "USER": "root",
+        "PASSWORD": "",
+        "HOST": "localhost",
+        "PORT": "3306"
+    }
+}
 
 # AWS server database
+
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.mysql",
 #         "NAME": "scorecard",
 #         "USER": "admin",
 #         "PASSWORD": "Citta321",
-#         "HOST": "cb-rds-database.cluster-c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
+#         "HOST": "database-1.c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
 #         "PORT": "3306"
 #     }
 # }
 
+# cittabase AWS rds database
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "scorecard",
         "USER": "admin",
-        "PASSWORD": "Citta321",
-        "HOST": "database-1.c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
+        "PASSWORD": "Citta-Work2024",
+        "HOST": "database-1.cfuku84asfvw.ap-south-1.rds.amazonaws.com",
         "PORT": "3306"
     }
 }
 
-# backup
+# --- backup -----
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.mysql",
@@ -190,6 +192,18 @@ DATABASES = {
 #         "PORT": "3306"
 #     }
 # }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "scorecard",
+#         "USER": "admin",
+#         "PASSWORD": "Citta321",
+#         "HOST": "cb-rds-database.cluster-c1q4mqoqoblm.ap-south-1.rds.amazonaws.com",
+#         "PORT": "3306"
+#     }
+# }
+# ----------------------------
 
 
 

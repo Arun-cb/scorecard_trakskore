@@ -15,5 +15,6 @@ def jobs():
 def start():
     scheduler = BackgroundScheduler()
     scheduler.add_job(check_kpi_actulas_pending, 'interval', hours=12) 
+    scheduler.add_job(check_monthly_actuals_remainder, 'interval', hours=12) 
     scheduler.add_job(session_active_check, 'interval', minutes=15)
     scheduler.start()
