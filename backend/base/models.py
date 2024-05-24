@@ -352,14 +352,14 @@ class kpi_details(models.Model):
     scorecard_id = models.ForeignKey(
         scorecard, null=False, blank=False, db_column='scorecard_id', on_delete=models.CASCADE)
     kpi_code = models.CharField(max_length=100, null=False, blank=False)
-    kpi = models.CharField(max_length=200, null=False, blank=False)
+    kpi = models.CharField(max_length=200, null=True, blank=True)
     ytd = models.CharField(max_length=50, null=False,
                            blank=False, default="none")
     frequency = models.CharField(max_length=200, null=False, blank=False)
     period_type = models.CharField(max_length=200, null=False, blank=False)
     weight = models.CharField(max_length=200, null=False, blank=False)
     measure = models.CharField(max_length=200, null=False, blank=False)
-    baseline = models.IntegerField(null=False, blank=False)
+    baseline = models.IntegerField(null=True, blank=True)
     target = models.IntegerField(null=False, blank=False)
     min = models.IntegerField(null=False, blank=False)
     max = models.IntegerField(null=False, blank=False)
@@ -408,7 +408,11 @@ class kpi_stop_light_indicators(models.Model):
 
 class settings(models.Model):
     variable_name = models.CharField(max_length=300, null=False, blank=False)
-    value = models.CharField(max_length=300, null=False, blank=False)
+    value = models.CharField(max_length=30, null=False, blank=False)
+    types = models.CharField(max_length=30, null=True, blank=True)
+    hours = models.CharField(max_length=30, null=True, blank=True)
+    seconds = models.CharField(max_length=30, null=True, blank=True)
+    ampm = models.CharField(max_length=5, null=True, blank=True)
     user_id = models.IntegerField(null=False, blank=False)
     created_by = models.IntegerField(null=False, blank=False)
     created_date = models.DateTimeField(auto_now_add=True)

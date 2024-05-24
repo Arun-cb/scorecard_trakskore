@@ -40,6 +40,7 @@ import time
 
 import mysql.connector as sqlConnect
 import cx_Oracle
+from . import updater
 
 @api_view(["GET"])
 def getRoutes(request):
@@ -3561,27 +3562,37 @@ def upd_settings(request, id):
     else:
         all_item = settings.objects.all()
         for x in listData:
-            data = {
-                "variable_name": listData[x]["variable_name"],
-                "value": listData[x]["value"],
-                "user_id": id,
-                "created_by": listData[x]["created_by"],
-                "last_updated_by": listData[x]["last_updated_by"],
-            }
-
-            selected_item = all_item.filter(
-                variable_name=listData[x]["variable_name"], user_id=id
-            ).first()
-            if not selected_item:
-                serializer = settings_serializer(data=data)
-                if serializer.is_valid():
-                    serializer.save()
-            else:
-                serializer = settings_serializer(instance=selected_item, data=data)
-                if serializer.is_valid():
-                    serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            print("x data", x, listData[x])
+            if 'value' in listData[x] and listData[x]["value"] != '':
+                data = {
+                    "variable_name": listData[x]["variable_name"],
+                    "value": listData[x]["value"],
+                    "types": listData[x]["types"] if "types" in listData[x] else '',
+                    "hours": int(listData[x]["hours"]) if "hours" in listData[x] else '12',
+                    "seconds": int(listData[x]["seconds"]) if "seconds" in listData[x] else '00',
+                    "ampm": listData[x]["ampm"] if "ampm" in listData[x] else 'am',
+                    "user_id": id,
+                    "created_by": listData[x]["created_by"],
+                    "last_updated_by": listData[x]["last_updated_by"],
+                }
+                selected_item = all_item.filter(
+                    variable_name=listData[x]["variable_name"], user_id=id
+                ).first()
+                if not selected_item:
+                    serializer = settings_serializer(data=data)
+                    if serializer.is_valid():
+                        serializer.save()
+                    else:
+                        print("001 error", serializer.errors)
+                else:
+                    serializer = settings_serializer(instance=selected_item, data=data)
+                    if serializer.is_valid():
+                        # print("002 saved", data)
+                        serializer.save()
+                    else:
+                        print("002 error", serializer.errors)
+        updater.jobs_scheduler(id=id)
+        return Response("Success", status=status.HTTP_200_OK)
 
 
 # validation of scorecard
@@ -4307,7 +4318,6 @@ def get_first_day_of_the_next_quarter(day, month, year):
 
 
 def get_last_day_of_the_quarter(day, month, year):
-    print("enter get_last_day_of_the_quarter", day, month, year)
     quarter = int(get_quarter(month))
     f_month = 3 * quarter
     remaining = int(f_month / 12)
@@ -4839,6 +4849,19 @@ def dueDate_generator(lastActPeriod, frequency, period, kpi_id):
 
 # --------------------END---------------------
 
+def first_day_of_week(any_day):
+    day_of_week = any_day.weekday()
+    days_to_subtract = (day_of_week - 0) % 7
+    first_day_of_week = any_day - timedelta(days=days_to_subtract)
+    return first_day_of_week
+
+
+def last_day_of_week(any_day):
+    day_of_week = any_day.weekday()
+    days_to_subtract = (6 - day_of_week) % 7
+    last_day_of_week = any_day - timedelta(days=days_to_subtract)
+    return last_day_of_week
+
 def last_day_of_month(any_day):
     # The day 28 exists in every month. 4 days later, it's always next month
     next_month = any_day.replace(day=28) + datetime.timedelta(days=4)
@@ -4855,7 +4878,7 @@ from dateutil import relativedelta
 
 # Remainder section
 def check_monthly_actuals_remainder():
-    print("check_monthly_actuals_remainder")
+    # print("check_monthly_actuals_remainder")
     kpi_pending = kpi_pending_actions.objects.all()
     kpi_user = kpi_user_access.objects.filter(delete_flag='N')
     kpi_user_serializer = kpi_user_Access_serializer(kpi_user, many=True)
@@ -4931,7 +4954,191 @@ def check_monthly_actuals_remainder():
                                         serializer = kpi_pending_actions_serializer(instance=item, data=data)
                                         if serializer.is_valid():
                                             serializer.save()
+                if freq.strip() == 'Weekly':
+                    if kpi_created_date >= from_date and kpi_created_date <= to_date:
+                        last_actual_date = from_date if len(kpiActuals) == 0 else kpiActuals.last()['period']
+                        currect_date = to_date+timedelta(days=1) if (to_date > today) == False else today+timedelta(days=1)
+                        last_actual_date = from_date if len(kpiActuals) == 0 else kpiActuals.last()['period']
+                        pending_actuals = (datetime.datetime.strptime(currect_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date() - datetime.datetime.strptime(last_actual_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date()).days
+                        if (to_date > today) == True:
+                            check_exist_actual = ''
+                            if(i['period_type'].strip() == 'End'):
+                                check_exist_actual = kpi_actuals.objects.filter(delete_flag='N', kpi_id=i['id'], period=str(last_day_of_week(today).strftime("%Y-%m-%d"))).values()
+                                # if len(check_exist_actual) == 0 and (last_day_of_month(today) - today).days <= 7:
+                                if len(check_exist_actual) == 0:
+                                    data = {
+                                        'user_id' : userid,
+                                        'kpi' : i['kpi_code'],
+                                        'message' : i['kpi']+' next due date is '+str(last_day_of_week(today).strftime("%Y-%m-%d")),
+                                        'upcoming_date':str(last_day_of_week(today).strftime("%Y-%m-%d")),
+                                        'kpi_id':i["id"],
+                                        'action': "alert",
+                                        'created_by' : userid,
+                                        'last_updated_by':userid
+                                    }
+                                    # print("data end", data)
+                                    if (not kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid, action="alert", delete_flag='N')):
+                                        kpi_serializer = kpi_pending_actions_serializer(data=data)
+                                        if(kpi_serializer.is_valid()):
+                                            kpi_serializer.save()
+                                    if(kpi_pending.filter(kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N')):
+                                        json=kpi_pending.filter(kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N').values("id")
+                                        item = kpi_pending_actions.objects.get(id=json[0]["id"])
+                                        serializer = kpi_pending_actions_serializer(instance=item, data=data)
+                                        if serializer.is_valid():
+                                            serializer.save()
+                            else:
+                                # get_begin_date = round(pending_actuals/7)*7 - (from_date - first_day_of_week(from_date)).days
+                                # print("Checkinfjhgdjfbjdb", from_date+timedelta(days=get_begin_date))
+                                check_exist_actual = kpi_actuals.objects.filter(delete_flag='N', kpi_id=i['id'], period=str(first_day_of_week(today).strftime("%Y-%m-%d"))).values()
+                                # if len(check_exist_actual) == 0 and (last_day_of_month(today) - today).days <= 7:
+                                if len(check_exist_actual) == 0:
+                                    data = {
+                                        'user_id' : userid,
+                                        'kpi' : i['kpi_code'],
+                                        'message' : i['kpi']+' next due date is '+str(first_day_of_week(today).strftime("%Y-%m-%d")),
+                                        'upcoming_date':str(first_day_of_week(today).strftime("%Y-%m-%d")),
+                                        'kpi_id':i["id"],
+                                        'action': "alert",
+                                        'created_by' : userid,
+                                        'last_updated_by':userid
+                                    }
                                     # print("data begin", data)
+                                    if (not kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(),user_id=userid, action="alert", delete_flag='N')):
+                                        kpi_serializer = kpi_pending_actions_serializer(data=data)
+                                        if(kpi_serializer.is_valid()):
+                                            print("enter 12")
+                                            kpi_serializer.save()
+                                    
+                                    if(kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N')):
+                                        json=kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N').values("id")
+                                        item = kpi_pending_actions.objects.get(id=json[0]["id"])
+                                        serializer = kpi_pending_actions_serializer(instance=item, data=data)
+                                        if serializer.is_valid():
+                                            serializer.save()
+                if freq.strip() == 'Quarterly':
+                    if kpi_created_date >= from_date and kpi_created_date <= to_date:
+                        last_actual_date = from_date if len(kpiActuals) == 0 else kpiActuals.last()['period']
+                        currect_date = to_date+timedelta(days=1) if (to_date > today) == False else today+timedelta(days=1)
+                        last_actual_date = from_date if len(kpiActuals) == 0 else kpiActuals.last()['period']
+                        pending_actuals = (datetime.datetime.strptime(currect_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date() - datetime.datetime.strptime(last_actual_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date()).days
+                        if (to_date > today) == True:
+                            check_exist_actual = ''
+                            if(i['period_type'].strip() == 'End'):
+                                check_exist_actual = kpi_actuals.objects.filter(delete_flag='N', kpi_id=i['id'], period=str(get_last_day_of_the_quarter(today.day, today.month, today.year).strftime("%Y-%m-%d"))).values()
+                                # if len(check_exist_actual) == 0 and (last_day_of_month(today) - today).days <= 7:
+                                if len(check_exist_actual) == 0:
+                                    data = {
+                                        'user_id' : userid,
+                                        'kpi' : i['kpi_code'],
+                                        'message' : i['kpi']+' next due date is '+str(get_last_day_of_the_quarter(today.day, today.month, today.year).strftime("%Y-%m-%d")),
+                                        'upcoming_date':str(get_last_day_of_the_quarter(today.day, today.month, today.year).strftime("%Y-%m-%d")),
+                                        'kpi_id':i["id"],
+                                        'action': "alert",
+                                        'created_by' : userid,
+                                        'last_updated_by':userid
+                                    }
+                                    # print("data end", data)
+                                    if (not kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(),user_id=userid, action="alert", delete_flag='N')):
+                                        kpi_serializer = kpi_pending_actions_serializer(data=data)
+                                        if(kpi_serializer.is_valid()):
+                                            kpi_serializer.save()
+                                    if(kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N')):
+                                        json=kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N').values("id")
+                                        item = kpi_pending_actions.objects.get(id=json[0]["id"])
+                                        serializer = kpi_pending_actions_serializer(instance=item, data=data)
+                                        if serializer.is_valid():
+                                            serializer.save()
+                            else:
+                                # get_begin_date = round(pending_actuals/7)*7 - (from_date - first_day_of_week(from_date)).days
+                                # print("Checkinfjhgdjfbjdb", from_date+timedelta(days=get_begin_date))
+                                check_exist_actual = kpi_actuals.objects.filter(delete_flag='N', kpi_id=i['id'], period=str(get_first_day_of_the_next_quarter(today.day, today.month, today.year).strftime("%Y-%m-%d"))).values()
+                                # if len(check_exist_actual) == 0 and (last_day_of_month(today) - today).days <= 7:
+                                if len(check_exist_actual) == 0:
+                                    data = {
+                                        'user_id' : userid,
+                                        'kpi' : i['kpi_code'],
+                                        'message' : i['kpi']+' next due date is '+str(get_first_day_of_the_next_quarter(today.day, today.month, today.year).strftime("%Y-%m-%d")),
+                                        'upcoming_date':str(get_first_day_of_the_next_quarter(today.day, today.month, today.year).strftime("%Y-%m-%d")),
+                                        'kpi_id':i["id"],
+                                        'action': "alert",
+                                        'created_by' : userid,
+                                        'last_updated_by':userid
+                                    }
+                                    # print("data begin", data)
+                                    if (not kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(),user_id=userid, action="alert", delete_flag='N')):
+                                        kpi_serializer = kpi_pending_actions_serializer(data=data)
+                                        if(kpi_serializer.is_valid()):
+                                            kpi_serializer.save()
+                                    
+                                    if(kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N')):
+                                        json=kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N').values("id")
+                                        item = kpi_pending_actions.objects.get(id=json[0]["id"])
+                                        serializer = kpi_pending_actions_serializer(instance=item, data=data)
+                                        if serializer.is_valid():
+                                            serializer.save()
+                if freq.strip() == 'Half-yearly':
+                    if kpi_created_date >= from_date and kpi_created_date <= to_date:
+                        last_actual_date = from_date if len(kpiActuals) == 0 else kpiActuals.last()['period']
+                        currect_date = to_date+timedelta(days=1) if (to_date > today) == False else today+timedelta(days=1)
+                        pending_actuals = (datetime.datetime.strptime(currect_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date() - datetime.datetime.strptime(last_actual_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date()).days
+                        if (to_date > today) == True:
+                            check_exist_actual = ''
+                            if(i['period_type'].strip() == 'End'):
+                                check_exist_actual = kpi_actuals.objects.filter(delete_flag='N', kpi_id=i['id'], period=str(get_last_day_of_the_quarter(today.day, today.month, today.year).strftime("%Y-%m-%d"))).values()
+                                # if len(check_exist_actual) == 0 and (last_day_of_month(today) - today).days <= 7:
+                                if len(check_exist_actual) == 0:
+                                    data = {
+                                        'user_id' : userid,
+                                        'kpi' : i['kpi_code'],
+                                        'message' : i['kpi']+' next due date is '+str(get_last_day_of_the_half_yearly(today.day, today.month, today.year).strftime("%Y-%m-%d")),
+                                        'upcoming_date':str(get_last_day_of_the_half_yearly(today.day, today.month, today.year).strftime("%Y-%m-%d")),
+                                        'kpi_id':i["id"],
+                                        'action': "alert",
+                                        'created_by' : userid,
+                                        'last_updated_by':userid
+                                    }
+                                    # print("data end", data)
+                                    if (not kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(),user_id=userid, action="alert", delete_flag='N')):
+                                        kpi_serializer = kpi_pending_actions_serializer(data=data)
+                                        if(kpi_serializer.is_valid()):
+                                            kpi_serializer.save()
+                                    if(kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N')):
+                                        json=kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N').values("id")
+                                        item = kpi_pending_actions.objects.get(id=json[0]["id"])
+                                        serializer = kpi_pending_actions_serializer(instance=item, data=data)
+                                        if serializer.is_valid():
+                                            serializer.save()
+                            else:
+                                # get_begin_date = round(pending_actuals/7)*7 - (from_date - first_day_of_week(from_date)).days
+                                # print("Checkinfjhgdjfbjdb", from_date+timedelta(days=get_begin_date))
+                                check_exist_actual = kpi_actuals.objects.filter(delete_flag='N', kpi_id=i['id'], period=str(get_first_day_of_the_next_half_yearly(today.day, today.month, today.year).strftime("%Y-%m-%d"))).values()
+                                # if len(check_exist_actual) == 0 and (last_day_of_month(today) - today).days <= 7:
+                                if len(check_exist_actual) == 0:
+                                    data = {
+                                        'user_id' : userid,
+                                        'kpi' : i['kpi_code'],
+                                        'message' : i['kpi']+' next due date is '+str(get_first_day_of_the_next_half_yearly(today.day, today.month, today.year).strftime("%Y-%m-%d")),
+                                        'upcoming_date':str(get_first_day_of_the_next_half_yearly(today.day, today.month, today.year).strftime("%Y-%m-%d")),
+                                        'kpi_id':i["id"],
+                                        'action': "alert",
+                                        'created_by' : userid,
+                                        'last_updated_by':userid
+                                    }
+                                    # print("data begin", data)
+                                    if (not kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(),user_id=userid, action="alert", delete_flag='N')):
+                                        kpi_serializer = kpi_pending_actions_serializer(data=data)
+                                        if(kpi_serializer.is_valid()):
+                                            kpi_serializer.save()
+                                    
+                                    if(kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N')):
+                                        json=kpi_pending.filter(kpi_id=i["id"], kpi=i['kpi_code'].strip(), action="alert",user_id=userid, delete_flag='N').values("id")
+                                        item = kpi_pending_actions.objects.get(id=json[0]["id"])
+                                        serializer = kpi_pending_actions_serializer(instance=item, data=data)
+                                        if serializer.is_valid():
+                                            serializer.save()
+    print("Kpi Remainder scheduler is running completed")
+
 
 
 def check_kpi_actulas_pending():
@@ -4943,8 +5150,6 @@ def check_kpi_actulas_pending():
         userid = user.pop('user_id')
         kpiid = user.pop('kpi_id')
         kpi = kpi_details.objects.filter(delete_flag='N', id=kpiid).values()
-        # serializer = kpi_details_serializer(kpi, many=True)
-        # if len(kpi) != 0 and kpi[0]['id'] == 49:
         for i in kpi:
             sc_from_to_date = scorecard.objects.filter(delete_flag='N', id=i['scorecard_id_id']).values()
             if(len(sc_from_to_date) == 1):
@@ -4962,47 +5167,53 @@ def check_kpi_actulas_pending():
                 # today_k = to_date.strftime("%Y-%m-%d") > today.strftime("%Y-%m-%d") if today.strftime("%Y-%m-%d") else to_date.strftime("%Y-%m-%d")
                 # print("to_date", to_date)
                 # print(relativedelta.relativedelta(datetime.datetime.strptime("2023-12-31", "%Y-%m-%d"), datetime.datetime.strptime("2022-02-01", "%Y-%m-%d")).months)
-                if freq.strip() == 'Monthly':
-                    # if (to_date > today) == False:
+                # if freq.strip() == 'Monthly':
                     # Pending Section
-                    if kpi_created_date >= from_date and kpi_created_date <= to_date:
-                        currect_date = to_date if (to_date > today) == False else today
-                        # if(i['period_type'].strip() == 'End'):
-                        #     currect_date = last_day_of_month(currect_date)
-                        # else:
-                        #     currect_date = first_day_of_month(currect_date)
-
-                        count_from_to_btwn = relativedelta.relativedelta(to_date, from_date).months
-                        # last_actual_date = (from_date-timedelta(days=1)) if len(kpiActuals) == 0 else kpiActuals.last()['period']
-                        last_actual_date = from_date if len(kpiActuals) == 0 else kpiActuals.last()['period']
-                        count_no_of_pending_actuals = relativedelta.relativedelta(datetime.datetime.strptime(currect_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date(), datetime.datetime.strptime(last_actual_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date())
-                        count_no_of_pending_actuals_months = count_no_of_pending_actuals.months + (12*count_no_of_pending_actuals.years)
-                        if count_no_of_pending_actuals_months > 0:
-                            data = {
-                                'user_id' : userid,
-                                'kpi' : i['kpi_code'],
-                                'message' : i['kpi']+' having '+str(count_no_of_pending_actuals_months)+' pending actuals.',
-                                # 'upcoming_date':'0000-00-00',
-                                # 'upcoming_date':kpi_created_date.strptime(kpi_day,"%Y-%m-%d"),
-                                'kpi_id':i["id"],
-                                'action': "pending",
-                                'created_by' : userid,
-                                'last_updated_by':userid
-                            }
-                            # print("data", data)
-                            if (not kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid, delete_flag='N')):
-                                kpi_serializer = kpi_pending_actions_serializer(data=data)
-                                if(kpi_serializer.is_valid()):
-                                    kpi_serializer.save()
-                            if(kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid, delete_flag='N')):
-                                json=kpi_pending.filter(kpi=i['kpi_code'].strip()).values("id")
-                                item = kpi_pending_actions.objects.get(id=json[0]["id"])
-                                serializer = kpi_pending_actions_serializer(instance=item, data=data)
-                                if serializer.is_valid():
-                                    serializer.save()
-                        else:
-                            kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid, delete_flag='N').delete()
-                            # print("change delete_flag for existing entry in pendings table")
+                if kpi_created_date >= from_date and kpi_created_date <= to_date:
+                    currect_date = to_date+timedelta(days=1) if (to_date > today) == False else today+timedelta(days=1)
+                    count_from_to_btwn = relativedelta.relativedelta(to_date, from_date).months
+                    # last_actual_date = (from_date-timedelta(days=1)) if len(kpiActuals) == 0 else kpiActuals.last()['period']
+                    last_actual_date = from_date if len(kpiActuals) == 0 else kpiActuals.last()['period']
+                    count_no_of_pending_actuals = relativedelta.relativedelta(datetime.datetime.strptime(currect_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date(), datetime.datetime.strptime(last_actual_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date())
+                    pending_actuals = int(0)
+                    if freq.strip() == 'Monthly':
+                        pending_actuals = count_no_of_pending_actuals.months + (12*count_no_of_pending_actuals.years)
+                    if freq.strip() == 'Daily':
+                        pending_actuals = (datetime.datetime.strptime(currect_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date() - datetime.datetime.strptime(last_actual_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date()).days
+                    if freq.strip() == 'Weekly':
+                        pending_actuals = (datetime.datetime.strptime(currect_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date() - datetime.datetime.strptime(last_actual_date.strftime("%Y-%m-%d"), "%Y-%m-%d").date()).days / 7
+                    if freq.strip() == 'Quarterly':
+                        pending_actuals = (count_no_of_pending_actuals.months + (12*count_no_of_pending_actuals.years)) / 3
+                    if freq.strip() == 'Half-yearly':
+                        pending_actuals = (count_no_of_pending_actuals.months + (12*count_no_of_pending_actuals.years)) / 6
+                    if freq.strip() == 'Annualy':
+                        pending_actuals = (count_no_of_pending_actuals.months + (12*count_no_of_pending_actuals.years)) / 12
+                    if round(pending_actuals) > 0:
+                        data = {
+                            'user_id' : userid,
+                            'kpi' : i['kpi_code'],
+                            'message' : i['kpi']+' having '+str(round(pending_actuals))+' pending actuals.',
+                            # 'upcoming_date':'0000-00-00',
+                            # 'upcoming_date':kpi_created_date.strptime(kpi_day,"%Y-%m-%d"),
+                            'kpi_id':i["id"],
+                            'action': "pending",
+                            'created_by' : userid,
+                            'last_updated_by':userid
+                        }
+                        # print("data", data)
+                        if (not kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid,action="pending", delete_flag='N')):
+                            kpi_serializer = kpi_pending_actions_serializer(data=data)
+                            if(kpi_serializer.is_valid()):
+                                kpi_serializer.save()
+                        if(kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid,action="pending", delete_flag='N')):
+                            json=kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid,action="pending", delete_flag='N').values("id")
+                            item = kpi_pending_actions.objects.get(id=json[0]["id"])
+                            serializer = kpi_pending_actions_serializer(instance=item, data=data)
+                            if serializer.is_valid():
+                                serializer.save()
+                    else:
+                        kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid, delete_flag='N').delete()
+                        # print("change delete_flag for existing entry in pendings table")
                     # Remainder section
                         # if (to_date > today) == True:
                         #     if(i['period_type'].strip() == 'End'):
@@ -5507,6 +5718,7 @@ def check_kpi_actulas_pending():
                     #         if (kpi_serializer.is_valid() and not kpi_pending.filter(kpi=i['kpi_code'].strip(),user_id=userid)):
                     #             print(data)
                     #             # kpi_serializer.save()
+    print("Kpi pending scheduler is running completed")
 
 #---------------------End Old Fun ---------------------------
 
@@ -6654,7 +6866,7 @@ def fun_upd_objective(data, scid, scdid, perid):
                 Sc_obj_serializer.save()
 
                 if len(data["kpi_items"]) != 0:
-                    # print("buss succ", data)
+                    print("kpi_items", data["kpi_items"])
                     for i in range(len(data["kpi_items"])):
                         fun_kpi_details(
                             data["kpi_items"][i],
@@ -6678,7 +6890,7 @@ def fun_kpi_details(data, scid, scdid, perid, objid):
         "frequency": data["frequency"],
         "weight": data["weight"],
         "measure": data["measure"],
-        "baseline": data["baseline"],
+        "baseline": data["baseline"] if data["baseline"] != '' else None,
         "target": data["target"],
         "min": data["min"],
         "max": data["max"],
@@ -6688,7 +6900,7 @@ def fun_kpi_details(data, scid, scdid, perid, objid):
         "created_by": data["created_by"],
         "last_updated_by": data["last_updated_by"],
     }
-
+    print("kpi_data", kpi_data)
     if "id" in data:
         if "isDeleted" not in data:
             sc_kpi_item = kpi_details.objects.get(id=data["id"])
@@ -6730,9 +6942,9 @@ def fun_kpi_details(data, scid, scdid, perid, objid):
     else:
         if "isDeleted" not in data:
             sc_kpi_serializer = kpi_details_serializer(data=kpi_data)
+            print("sc_kpi_serializer", sc_kpi_serializer)
             if sc_kpi_serializer.is_valid():
                 sc_kpi_serializer.save()
-
                 # print("kpi_succ", data["Indicators"])
                 if len(data["Indicators"]) != 0 and data["Indicators"] == False:
                     for i in range(len(data["Indicators"])):
@@ -6757,6 +6969,8 @@ def fun_kpi_details(data, scid, scdid, perid, objid):
                         kpi_data["created_by"],
                         kpi_data["last_updated_by"],
                     )
+            else:
+                print(sc_kpi_serializer.errors)
 
 
 def fun_kpi_sli(data, scid, scdid, objid, kpiid):
@@ -7469,14 +7683,18 @@ def ScoreCalculation(data, all, actual_name='actuals', score_name='score', perf_
             data['indicator_colors'] = GetIndicatorArray(data['id'])
 
 def GetObjectiveScoreCalculation(data):
+    print("GetObjectiveScoreCalculation data", data)
     score = 0
     for d_kpi in data:
-        score = score + (int(d_kpi['score'])*int(d_kpi['weight']))/100
+        # score = score + (d_kpi['score']*d_kpi['weight'])/100
+        print(d_kpi['score'], type(d_kpi['score']))
+        print(d_kpi['weight'], type(d_kpi['weight']))
+        score = float(score) + (float(d_kpi['score'])*float(d_kpi['weight']))/100
         # score = score + int(d_kpi['score'])
     return int(round(score, 0))
     # return int(round((int(score) * int(weight) / 100), 0))
 
-
+# print("checkinh", )
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_scorecard_details_yet_kpi(request, id=0):
@@ -7571,6 +7789,7 @@ def get_curr_prev_actual_score(request, id=0):
                 d_kpipin['perspective_id'] = kpi[0]['perspective_id']
                 d_kpipin['objective_id'] = kpi[0]['objective_id']
             del d_kpi['actuals']
+    print(kpipin)
     return Response(kpipin, status=status.HTTP_200_OK)
 
 
@@ -8050,7 +8269,7 @@ def del_rb_db_connect_table(request, id):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_countries(request, id=0):
     if id == 0:
         country = countries.objects.filter(delete_flag="N")
@@ -8061,7 +8280,7 @@ def get_countries(request, id=0):
     return Response(serializer.data)
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_state(request, id=0):
     state_data = states.objects.filter(country_id=id)
     serializer = state_serializer(state_data, many=True)

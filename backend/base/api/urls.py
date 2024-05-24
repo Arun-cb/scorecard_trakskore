@@ -1,6 +1,7 @@
 from django.urls import URLPattern, path
 from . import rb_views
 from . import views
+from . import updater
 from .views import (
     search_currency_code,
     search_currency_name,
@@ -463,5 +464,6 @@ urlpatterns = [
     path("get_countries",views.get_countries),
     path("get_state/<int:id>/",views.get_state),
     path("get_state",views.get_state),
+    path("instant_scduler",updater.instant_jobs_scheduler),
         
 ]

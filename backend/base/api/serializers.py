@@ -347,8 +347,9 @@ class business_goals_objectives_serializer(serializers.ModelSerializer):
 class settings_serializer(serializers.ModelSerializer):
     class Meta:
         model = settings
-        fields = ('variable_name', 'value', 'user_id',
-                  'created_by', 'last_updated_by')
+        fields = '__all__'
+        # fields = ('variable_name', 'value', 'types', 'hours', 'seconds', 'ampm', 'user_id',
+        #           'created_by', 'last_updated_by')
 
 
 # KPI Serializer
