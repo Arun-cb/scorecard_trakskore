@@ -615,7 +615,7 @@ class kpi_actuals_monthly_score(models.Model):
     actual_month = models.CharField(max_length=50)
     performance = models.IntegerField()
     score = models.IntegerField()
-    weight = models.IntegerField()
+    weight = models.DecimalField(max_digits=10, decimal_places=2)
     objective_description = models.CharField(max_length=50)
     scorecard_description = models.CharField(max_length=50)
     perspective_description = models.CharField(max_length=50)
