@@ -3857,9 +3857,9 @@ def upd_kpi_actuals(request, id):
 
     for i in range(len(update_actual)):
         kpi_actual_update = {
-            "scorecard_id": update_actual[i]["scorecard_id"],
-            "perspective_id": update_actual[i]["perspective_id"],
-            "objective_id": update_actual[i]["objective_id"],
+            "scorecard_id": update_actual[i]["scorecard_id"] if "scorecard_id" in update_actual[i] else None,
+            "perspective_id": update_actual[i]["perspective_id"] if "perspective_id" in update_actual[i] else None,
+            "objective_id": update_actual[i]["objective_id"] if "objective_id" in update_actual[i] else None,
             "kpi_id": update_actual[i]["kpi_id"],
             "period": update_actual[i]["period"],
             "actuals_date": update_actual[i]["actuals_date"],
@@ -3916,6 +3916,13 @@ def smp_get_kpi(request, kpi_id, sc_id, obj_id, prep_id):
         & Q(objective_id=obj_id)
         & Q(perspective_id=prep_id)
     )
+    serializer = kpi_actuals_serializer(smp_obj, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def smp_get_kpi_new(request, kpi_id):
+    smp_obj = kpi_actuals.objects.filter(Q(kpi_id=kpi_id))
     serializer = kpi_actuals_serializer(smp_obj, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -6277,7 +6284,6 @@ class search_scorecard_description(generics.ListAPIView):
 @permission_classes([IsAuthenticated])
 def filter_scorecard_description(request, id):
     org = scorecard.objects.filter(id=id, delete_flag="N")
-    print("org",org)
     serializer = scorecard_serializer(org, many=True)
     return Response(serializer.data)
 
@@ -6683,7 +6689,6 @@ def ins_scorecard_details_objective_kpi(request, id):
             status=status.HTTP_200_OK,
         )
     else:
-        # print("error", error)
         return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -6697,8 +6702,6 @@ def ins_scorecard_details_objective_kpi(request, id):
 # @permission_classes([IsAuthenticated])
 def ins_kpi_pin_dashboard(request):
     kpi_pin_data = request.data
-    # print("kpi_pin_data", kpi_pin_data)
-
     pinData = {
         "kpi_name": kpi_pin_data["kpi_name"],
         "kpi_id": kpi_pin_data["kpi_id"],
@@ -6733,8 +6736,6 @@ def get_kpi_pin_dashboard(request, id=0):
 @permission_classes([IsAuthenticated])
 def upd_kpi_pin_dashboard(request):
     kpi_pin_data = request.data
-    # print(kpi_pin_data)
-
     kpi_pin_serializer = kpi_pin_dashboard_serializer(data=kpi_pin_data)
 
     if kpi_pin_serializer.is_valid():
@@ -6756,10 +6757,7 @@ def upd_kpi_pin_dashboard(request):
 @permission_classes([IsAuthenticated])
 def del_kpi_pin_dashboard(request, id=0):
     pinView = kpi_pin_dashboard.objects.get(id=id)
-    # print(pinView)
     pinData = request.data
-    # print(pinData)
-
     if pinView.pin_flag != pinData["pin_flag"]:
         pinView.pin_flag = pinData["pin_flag"]
     if pinView.last_updated_by != pinData["last_updated_by"]:
@@ -6813,10 +6811,8 @@ def fun_upd_scorecard_details(data, scid):
             sc_det_serializer = scorecard_details_serializer(data=sc_det_data)
             if sc_det_serializer.is_valid():
                 sc_det_serializer.save()
-                # print("data", data)
                 if len(data["BusinessGoal"]) != 0:
                     for i in range(len(data["BusinessGoal"])):
-                        # print("yes2")
                         fun_upd_objective(
                             data["BusinessGoal"][i], scid, sc_det_serializer.data["id"], data["perspective_id"]
                         )
@@ -6858,7 +6854,6 @@ def fun_upd_objective(data, scid, scdid, perid):
             del_data = business_goals_objectives.objects.filter(id=data["id"]).update(
                 delete_flag="Y"
             )
-
     else:
         if "isDeleted" not in data:
             Sc_obj_serializer = business_goals_objectives_serializer(data=businessdata)
@@ -6866,7 +6861,6 @@ def fun_upd_objective(data, scid, scdid, perid):
                 Sc_obj_serializer.save()
 
                 if len(data["kpi_items"]) != 0:
-                    print("kpi_items", data["kpi_items"])
                     for i in range(len(data["kpi_items"])):
                         fun_kpi_details(
                             data["kpi_items"][i],
@@ -6900,7 +6894,6 @@ def fun_kpi_details(data, scid, scdid, perid, objid):
         "created_by": data["created_by"],
         "last_updated_by": data["last_updated_by"],
     }
-    print("kpi_data", kpi_data)
     if "id" in data:
         if "isDeleted" not in data:
             sc_kpi_item = kpi_details.objects.get(id=data["id"])
@@ -6942,7 +6935,6 @@ def fun_kpi_details(data, scid, scdid, perid, objid):
     else:
         if "isDeleted" not in data:
             sc_kpi_serializer = kpi_details_serializer(data=kpi_data)
-            print("sc_kpi_serializer", sc_kpi_serializer)
             if sc_kpi_serializer.is_valid():
                 sc_kpi_serializer.save()
                 # print("kpi_succ", data["Indicators"])
@@ -7191,7 +7183,6 @@ def ins_upd_license(request, id):
 @api_view(["GET"])
 def get_license(request):
     current_datetime = datetime.datetime.now().date()
-    # print("current_datetime", current_datetime)
     licensed = user_license.objects.filter(delete_flag="N")
     serializer = user_license_serializer(licensed, many=True)
     return Response(
@@ -7205,7 +7196,6 @@ def get_license(request):
 @permission_classes([IsAuthenticated])
 def ins_chat_pin_homepage(request):
     chart_pin_data = request.data
-    print("kpi_pin_data",chart_pin_data)
 
     chartPinData = {
         "kpi_id": chart_pin_data["kpi_id"],
@@ -7252,8 +7242,6 @@ def upd_chart_pin_dashboard(request):
 @api_view(["PUT"])
 def update_order_no(request):
     orderData = request.data
-    # print("orderData", orderData)
-
     for item in orderData:
         kpi_id = item["kpi_id"]
         order_no = item["order_no"]
@@ -7436,7 +7424,6 @@ def get_sso(request, id=0):
 # @permission_classes([IsAuthenticated])
 def upd_sso(request, id):
     item = sso_configure.objects.get(id=id)
-    print(request.data)
     serializer = sso_configure_serializer(instance=item, data=request.data)
 
     if serializer.is_valid():
@@ -7491,7 +7478,6 @@ def notification_show_handle(request, id):
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def notification_kpi_show_handle(request, id):
-    # print(id)
     notification_res = kpi_pending_actions.objects.filter(id=id).update(delete_flag="Y")
     if notification_res:
         return Response(status=status.HTTP_200_OK)
@@ -7555,8 +7541,8 @@ def upd_user_profile(request, id):
 
     userStatus = 0 if data["user_status"] == 'false' else 1
     profilePic = "" if data["profile_pic"] == 'false' else data["profile_pic"]
-    print(f"==>> profilePic: {profilePic}")
-    print(f"==>> =: {data['profile_pic']}")
+    # print(f"==>> profilePic: {profilePic}")
+    # print(f"==>> =: {data['profile_pic']}")
 
     if item.profile_pic:
         if len(item.profile_pic) > 0 and item.profile_pic != data["profile_pic"]:
@@ -7658,7 +7644,7 @@ def ScoreCalculation(data, all, actual_name='actuals', score_name='score', perf_
     else:
         d_actuals = data['actuals'][len(data['actuals'])-1]
     if d_actuals and len(d_actuals) > 0:
-        if data['optimization'] == 'Minimum':
+        if data['optimization'] in ('Minimum', 'minimum'):
             performance = (data['max'] - d_actuals['actuals']) / (data['max'] - data['target'])
             data[perf_name] = performance
             if int(round(performance*100, 0)) < 0:
@@ -7669,7 +7655,7 @@ def ScoreCalculation(data, all, actual_name='actuals', score_name='score', perf_
                 data[score_name] = int(round(performance*100, 0))
             data[ind_name] = GetIndicator(data['id'], data[score_name])
             data['indicator_colors'] = GetIndicatorArray(data['id'])
-        elif data['optimization'] == 'Maximum':
+        elif data['optimization'] in ('Maximum', 'maximum'):
             performance = (d_actuals['actuals'] - data['min']) / (data['target'] - data['min'])
             data[perf_name] = performance
             if int(round(performance*100, 0)) < 0:
@@ -7683,18 +7669,18 @@ def ScoreCalculation(data, all, actual_name='actuals', score_name='score', perf_
             data['indicator_colors'] = GetIndicatorArray(data['id'])
 
 def GetObjectiveScoreCalculation(data):
-    print("GetObjectiveScoreCalculation data", data)
     score = 0
     for d_kpi in data:
         # score = score + (d_kpi['score']*d_kpi['weight'])/100
-        print(d_kpi['score'], type(d_kpi['score']))
-        print(d_kpi['weight'], type(d_kpi['weight']))
+        # print(d_kpi['score'], type(d_kpi['score']))
+        # print(d_kpi['weight'], type(d_kpi['weight']))
+        # print("d_kpi", d_kpi)
+        # print("float(score)", float(score))
         score = float(score) + (float(d_kpi['score'])*float(d_kpi['weight']))/100
         # score = score + int(d_kpi['score'])
     return int(round(score, 0))
     # return int(round((int(score) * int(weight) / 100), 0))
 
-# print("checkinh", )
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_scorecard_details_yet_kpi(request, id=0):
@@ -7707,14 +7693,14 @@ def get_scorecard_details_yet_kpi(request, id=0):
                 pers = perspectives.objects.filter(id=d_scd['perspective_id'], delete_flag='N').values("id","perspective","description")
                 d_scd['perspective'] = pers[0]['perspective']
                 d_scd['description'] = pers[0]['description']
-                obj = business_goals_objectives.objects.filter(scorecard_id=d_sc['id'], scorecard_details_id=d_scd['id'], delete_flag='N').values("id","objective_code","objective_description","weight")
+                obj = business_goals_objectives.objects.filter(scorecard_id=d_sc['id'], scorecard_details_id=d_scd['id'], delete_flag='N').values("id","objective_code","objective_description","weight").order_by('id')
                 d_scd['objective'] = list(obj)
                 for d_obj in d_scd['objective']:
                     kpi = kpi_details.objects.filter(scorecard_id=d_sc['id'], scorecard_details_id=d_scd['id'], objective_id=d_obj['id'], delete_flag='N').values("id","kpi_code","kpi","weight","target","min","max","optimization")
                     d_obj['kpi'] = list(kpi)
                     for d_kpi in d_obj['kpi']:
-                        actuals = kpi_actuals.objects.filter(scorecard_id=d_sc['id'], perspective_id=d_scd['id'], objective_id=d_obj['id'],kpi_id=d_kpi['id'], delete_flag='N').values("id","period","actuals","actuals_date","actuals_boolean","summery")
-                        initiate = initiative.objects.filter(scorecard_id=d_sc['id'], perspective_id=d_scd['id'], objective_id=d_obj['id'],kpi_id=d_kpi['id'], delete_flag='N').values("id","scorecard_description","action_item","target_date","ownership","target_date","status","comments")
+                        actuals = kpi_actuals.objects.filter(kpi_id=d_kpi['id'], delete_flag='N').values("id","period","actuals","actuals_date","actuals_boolean","summery")
+                        initiate = initiative.objects.filter(kpi_id=d_kpi['id'], delete_flag='N').values("id","scorecard_description","action_item","target_date","ownership","target_date","status","comments")
                         d_kpi['actuals'] = list(actuals)
                         d_kpi['initiative'] = list(initiate)
                         d_kpi['scorecard_id'] = d_sc['id']
@@ -7727,7 +7713,10 @@ def get_scorecard_details_yet_kpi(request, id=0):
                             d_kpi['score'] = 0
                         del d_kpi['actuals']
                     d_obj['score'] = GetObjectiveScoreCalculation(d_obj['kpi'])
-                    d_obj['indicator'] = GetIndicator(score=d_obj['score'])
+                    if len(kpi) > 0:
+                        d_obj['indicator'] = GetIndicator(score=d_obj['score'])
+                    else:
+                        d_obj['indicator'] = 'none'
                 d_scd['score'] = GetObjectiveScoreCalculation(d_scd['objective'])
                 d_scd['indicator'] = GetIndicator(score=d_scd['score'])
             d_sc['score'] = GetObjectiveScoreCalculation(d_sc['scorecard_details'])
@@ -7789,7 +7778,7 @@ def get_curr_prev_actual_score(request, id=0):
                 d_kpipin['perspective_id'] = kpi[0]['perspective_id']
                 d_kpipin['objective_id'] = kpi[0]['objective_id']
             del d_kpi['actuals']
-    print(kpipin)
+    # print(kpipin)
     return Response(kpipin, status=status.HTTP_200_OK)
 
 
@@ -7890,7 +7879,6 @@ def ins_rb_db_connect_table(request):
     
     all_serializer_fields = list(serializer.fields.keys())
 
-    print("all_serializer_fields",all_serializer_fields)
 
     # Fields to exclude
     fields_to_exclude = ['id', 'created_by', 'last_updated_by', 'created_date']
@@ -7898,7 +7886,6 @@ def ins_rb_db_connect_table(request):
     # Remove the excluded fields from the list of field names
     required_serializer_fields = [field for field in all_serializer_fields if field not in fields_to_exclude]
 
-    # print("required_serializer_fields",required_serializer_fields)
 
     if serializer.is_valid():
         serializer.save()

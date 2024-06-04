@@ -323,7 +323,7 @@ class business_goals_objectives(models.Model):
         scorecard_details, null=False, blank=False, on_delete=models.CASCADE, db_column='scorecard_details_id')
     objective_code = models.CharField(max_length=100, null=False, blank=False)
     objective_description = models.CharField(
-        max_length=500, null=False, blank=False)
+        max_length=500, null=True, blank=True)
     weight = models.CharField(max_length=500, null=False, blank=False)
     created_by = models.IntegerField(null=False, blank=False)
     created_date = models.DateTimeField(auto_now_add=True)
@@ -429,11 +429,11 @@ class settings(models.Model):
 
 class kpi_actuals(models.Model):
     scorecard_id = models.ForeignKey(
-        scorecard, null=False, blank=False, db_column='scorecard_id', on_delete=models.CASCADE)
+        scorecard, null=True, blank=True, db_column='scorecard_id', on_delete=models.CASCADE)
     perspective_id = models.ForeignKey(
-        scorecard_details, null=False, blank=False, db_column='perspective_id', on_delete=models.CASCADE)
-    objective_id = models.ForeignKey(business_goals_objectives, null=False,
-                                     blank=False, db_column='objective_id', on_delete=models.CASCADE)
+        scorecard_details, null=True, blank=True, db_column='perspective_id', on_delete=models.CASCADE)
+    objective_id = models.ForeignKey(business_goals_objectives, null=True,
+                                     blank=True, db_column='objective_id', on_delete=models.CASCADE)
     kpi_id = models.ForeignKey(
         kpi_details, null=False, blank=False, db_column='kpi_id', on_delete=models.CASCADE)
     period = models.DateField(null=False, blank=False)

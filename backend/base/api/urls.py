@@ -248,6 +248,7 @@ urlpatterns = [
         "smp_get_kpi/<str:kpi_id>/<str:sc_id>/<str:prep_id>/<str:obj_id>",
         views.smp_get_kpi,
     ),
+    path("smp_get_kpi_new/<str:kpi_id>/", views.smp_get_kpi_new),
     # settings
     path("get_settings", views.get_settings),
     path("get_settings/<int:id>/", views.get_settings),
