@@ -3922,7 +3922,7 @@ def smp_get_kpi(request, kpi_id, sc_id, obj_id, prep_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def smp_get_kpi_new(request, kpi_id):
-    smp_obj = kpi_actuals.objects.filter(Q(kpi_id=kpi_id))
+    smp_obj = kpi_actuals.objects.filter(kpi_id=kpi_id)
     serializer = kpi_actuals_serializer(smp_obj, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
