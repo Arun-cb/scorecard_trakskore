@@ -338,6 +338,7 @@ urlpatterns = [
     #     path('check_actuals/', views.check_actuals),
     # KPI score Initiative
     path("get_sc_initiative", views.get_sc_initiative),
+    path("get_sc_initiative_details", views.get_sc_initiative_details),
     path("ins_sc_initiative", views.ins_sc_initiative),
     #  partial filters for scorecard
     path("scorecard_description/", search_scorecard_description.as_view()),

@@ -299,7 +299,7 @@ class scorecard_details_serializer(serializers.ModelSerializer):
     class Meta:
         model = scorecard_details
         fields = ('id', 'scorecard_id', 'perspective_id',
-                  'weight', 'created_by', 'last_updated_by')
+                  'weight', 'weight_editable', 'created_by', 'last_updated_by')
         validators = [
             UniqueTogetherValidator(
                 queryset=scorecard_details.objects.all(),
@@ -330,7 +330,7 @@ class business_goals_objectives_serializer(serializers.ModelSerializer):
     class Meta:
         model = business_goals_objectives
         fields = ('id', 'scorecard_id', 'scorecard_details_id', 'objective_code',
-                  'objective_description', 'weight', 'created_by', 'last_updated_by')
+                  'objective_description', 'weight', 'weight_editable', 'created_by', 'last_updated_by')
 
         validators = [
             UniqueTogetherValidator(
@@ -356,7 +356,7 @@ class settings_serializer(serializers.ModelSerializer):
 class kpi_details_serializer(serializers.ModelSerializer):
     class Meta:
         model = kpi_details
-        fields = ('id', 'perspective_id', 'objective_id', 'scorecard_details_id', 'scorecard_id', 'kpi_code', 'kpi', 'ytd', 'frequency', 'period_type', 'weight', 'measure',
+        fields = ('id', 'perspective_id', 'objective_id', 'scorecard_details_id', 'scorecard_id', 'kpi_code', 'kpi', 'ytd', 'frequency', 'period_type', 'weight', 'weight_editable', 'measure',
                   'baseline', 'target', 'min', 'max', 'optimization', 'chart_type', 'created_by', 'last_updated_by', 'created_date')
         # 'performance','score',
         validators = [

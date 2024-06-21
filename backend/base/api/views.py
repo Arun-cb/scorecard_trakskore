@@ -4102,10 +4102,16 @@ def get_chart_attributes_settings(
 def upd_chart_attributes_settings(request, id):
     updated_attributes = []
     listdata = request.data[0]
-    listKeys = ["user_id", "chart_type", "component", "Margin"]
+    listKeys = ["user_id", "chart_type", "component", "Margin", "Gauge"]
 
     for key in listdata:
         if key == "Margin":
+            for marginData in listdata[key]:
+                chart_attributes.objects.filter(id=marginData["id"]).update(
+                    attr_value=marginData["attr_value"]
+                )
+        
+        if key == "Gauge":
             for marginData in listdata[key]:
                 chart_attributes.objects.filter(id=marginData["id"]).update(
                     attr_value=marginData["attr_value"]
@@ -6300,6 +6306,28 @@ def get_sc_initiative(request):
     serializer = initiative_serializer(view, many=True)
     return Response(serializer.data)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_sc_initiative_details(request):
+    view = initiative.objects.all().values()
+    scorecard_data = scorecard.objects.all().values('id','scorecard_description')
+    kpi_data = kpi_details.objects.all().values('id','kpi_code','kpi')
+    # serializer = initiative_serializer(view, many=True)
+    for iv in view:
+        iv['target_date'] = iv['target_date'].strftime("%Y-%m-%d")
+        if iv['status'] == 'in_progress':
+            iv['status'] = 'In Progress'
+        elif iv['status'] == 'not_started':
+            iv['status'] = 'Not Started'
+        elif iv['status'] == 'complete':
+            iv['status'] = 'Completed'
+        if len(kpi_data.filter(id=iv['kpi_id_id'])) == 1:
+            iv['kpi_name'] = kpi_data.filter(id=iv['kpi_id_id'])[0]['kpi_code']
+            iv['kpi_data'] = kpi_data
+            iv['scorecard_data'] = scorecard_data
+    return Response(view)
+    # return Response(serializer.data)
+
 
 # Add
 
@@ -6783,6 +6811,7 @@ def fun_upd_scorecard_details(data, scid):
     sc_det_data = {
         "scorecard_id": scid,
         "weight": data["weight"],
+        "weight_editable": data["weight_editable"] if data["weight_editable"] else False,
         "perspective_id": data["perspective_id"],
         "created_by": data["created_by"],
         "last_updated_by": data["last_updated_by"],
@@ -6825,12 +6854,12 @@ def fun_upd_objective(data, scid, scdid, perid):
         "scorecard_id": scid,
         "scorecard_details_id": scdid,
         "weight": data["weight"],
+        "weight_editable": data["weight_editable"] if data["weight_editable"] else False,
         "objective_code": data["objective_code"],
         "objective_description": data["objective_description"],
         "created_by": data["created_by"],
         "last_updated_by": data["last_updated_by"],
     }
-
     if "id" in data:
         if "isDeleted" not in data:
             sc_obj_item = business_goals_objectives.objects.get(id=data["id"])
@@ -6883,6 +6912,7 @@ def fun_kpi_details(data, scid, scdid, perid, objid):
         "ytd": data["ytd"],
         "frequency": data["frequency"],
         "weight": data["weight"],
+        "weight_editable": data["weight_editable"] if "weight_editable" in data else False,
         "measure": data["measure"],
         "baseline": data["baseline"] if data["baseline"] != '' else None,
         "target": data["target"],
@@ -7734,7 +7764,7 @@ def get_kpi_dashboard_view(request, id=0):
             actuals = kpi_actuals.objects.filter(kpi_id=kpi[0]['id'], delete_flag='N').values("id","period","actuals","actuals_date","actuals_boolean","summery")
             if len(actuals) > 0:
                 kpi[0]['actuals'] = list(actuals)
-                ScoreCalculation(kpi[0], all='true')
+                ScoreCalculation(kpi[0], all='false')
         else:
             return Response(status=status.HTTP_200_OK)
     return Response(kpi, status=status.HTTP_200_OK)
