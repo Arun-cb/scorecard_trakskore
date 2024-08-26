@@ -11,8 +11,7 @@ from rest_framework import generics, status, filters
 from rest_framework.decorators import api_view
 from base.models import *
 
-# check_kpi_actulas_pending()
-# check_monthly_actuals_remainder()
+from base.api.automation.export_file import automationKpiActuals
 
 def jobs_scheduler(id):
     print("jobs_scheduler")
@@ -24,6 +23,13 @@ def instant_jobs_scheduler(request):
     print("jobs_scheduler")
     check_kpi_actulas_pending()
     check_monthly_actuals_remainder()
+    automationKpiActuals()
+    return Response("Scheduler has been completed", status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def testinstance(request):
+    automationKpiActuals()
     return Response("Scheduler has been completed", status=status.HTTP_200_OK)
 
 def checking():
@@ -40,7 +46,7 @@ def start(id = 0):
     if id != 0:
         sett = settings.objects.filter(user_id=id).values()
     if len(sett) != 0:
-        if len(sett.filter(variable_name='remaining_scheduler')[0]) != 0:
+        if sett.filter(variable_name='remaining_scheduler') and len(sett.filter(variable_name='remaining_scheduler')[0]) != 0:
             remainder_time = (sett.filter(variable_name='remaining_scheduler')[0]) if (sett.filter(variable_name='remaining_scheduler')) else remainder_time
             hour_for_remaining=23
             if remainder_time['ampm'] == 'pm':
@@ -64,6 +70,7 @@ def start(id = 0):
                 scheduler.add_job(check_monthly_actuals_remainder, 'interval', days=days, hours=hour_for_remaining, minutes=minutes, id='kpiRemainder')
             else:
                 scheduler.add_job(check_monthly_actuals_remainder, 'interval', seconds=int(remainder_time), id='kpiRemainder')
+        
         if sett.filter(variable_name='pending_scheduler') and len(sett.filter(variable_name='pending_scheduler')[0]) != 0:
             pending_time = (sett.filter(variable_name='pending_scheduler')[0]) if (sett.filter(variable_name='pending_scheduler')) else pending_time
             hour_for_pending=23
@@ -88,13 +95,13 @@ def start(id = 0):
                 scheduler.add_job(check_kpi_actulas_pending, 'interval', days=days, hours=hour_for_pending, minutes=minutes, id='kpiPending')
             else:
                 scheduler.add_job(check_kpi_actulas_pending, 'interval', seconds=int(pending_time), id='kpiPending')
+        
         # if id != 0:
             # scheduler.remove_job('checkingId')
             
             # scheduler.add_job(check_kpi_actulas_pending, 'interval', seconds=int(pending_time), id='kpiPending')
             # scheduler.add_job(check_monthly_actuals_remainder, 'interval', seconds=int(remainder_time), id='kpiRemainder')
     else:
-        print("else callled")
         # scheduler.add_job(checking, 'interval', seconds=int(remainder_time), id='checkingId', replace_existing=True)
         scheduler.add_job(check_kpi_actulas_pending, 'interval', seconds=int(pending_time), id='kpiPending') 
         scheduler.add_job(check_monthly_actuals_remainder, 'interval', seconds=int(remainder_time), id='kpiRemainder') 

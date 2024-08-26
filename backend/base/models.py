@@ -228,8 +228,8 @@ class config_codes(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=['config_type', 'config_code'], name='unique_config_type_config_code')
+            # models.UniqueConstraint(
+            #     fields=['config_type', 'config_code'], name='unique_config_type_config_code')
         ]
         db_table = "tb_sc_config_codes"
 
@@ -308,10 +308,6 @@ class scorecard_details(models.Model):
         max_length=1, null=False, blank=False, default='N')
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['perspective_id', 'scorecard_id'], name='unique_perspective_id_scorecard_id')
-        ]
         db_table = "tb_sc_scorecard_details"
 
 # Bussiness goals/Objectives
@@ -336,8 +332,8 @@ class business_goals_objectives(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['scorecard_id', 'scorecard_details_id', 'objective_code'],
-                                    name='unique_scorecard_id_scorecard_details_id_objective_code')
+            # models.UniqueConstraint(fields=['scorecard_id', 'scorecard_details_id', 'objective_code'],
+            #                         name='unique_scorecard_id_scorecard_details_id_objective_code')
         ]
         db_table = "tb_sc_business_goals_objectives"
 
@@ -366,10 +362,9 @@ class kpi_details(models.Model):
     target = models.IntegerField(null=False, blank=False)
     min = models.IntegerField(null=False, blank=False)
     max = models.IntegerField(null=False, blank=False)
-    # performance = models.IntegerField(null=False, blank=False)
-    # score = models.IntegerField(null=False, blank=False)
     optimization = models.CharField(max_length=200, null=False, blank=False)
     chart_type = models.CharField(max_length=200, null=False, blank=False)
+    actual_type = models.CharField(max_length=200, null=False, blank=False)
     created_by = models.IntegerField(null=False, blank=False)
     created_date = models.DateTimeField(auto_now_add=True)
     last_updated_by = models.IntegerField(null=False, blank=False)
@@ -379,8 +374,8 @@ class kpi_details(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['perspective_id', 'objective_id', 'scorecard_id', 'kpi_code'],
-                                    name='unique_perspective_code_objective_code_scorecard_id_kpi_code')
+            # models.UniqueConstraint(fields=['perspective_id', 'objective_id', 'scorecard_id', 'kpi_code'],
+            #                         name='unique_perspective_code_objective_code_scorecard_id_kpi_code')
         ]
         db_table = "tb_sc_kpi_details"
 
@@ -1266,3 +1261,30 @@ class states(models.Model):
 
     class Meta:
         db_table = "tb_sc_states"
+
+
+# Model for Computation Logic
+class computation_details(models.Model):
+    id = models.AutoField(primary_key=True)
+    kpi_id = models.ForeignKey(
+        kpi_details, null=False, blank=False, db_column='kpi_id', on_delete=models.CASCADE)
+    period_column = models.CharField(max_length=500, null=True, blank=True)
+    value_type = models.CharField(max_length=100, null=True, blank=True)
+    drill_down_value = models.CharField(max_length=100, null=True, blank=True)
+    no_of_sheets = models.IntegerField(null=True, blank=True)
+    sheet1 = models.CharField(max_length=100, null=True, blank=True)
+    sheet2 = models.CharField(max_length=100, null=True, blank=True)
+    computation_logic = models.CharField(max_length=500, null=False, blank=False)
+    filter_condition = models.CharField(max_length=500, null=True, blank=True)
+    url = models.CharField(max_length=1000, null=True, blank= True)
+    user_name = models.CharField(max_length=500, blank=True, null=True)
+    Password = models.CharField(max_length=500, blank=True, null=True)
+    Computation_type = models.CharField(max_length=1, null=False, blank=False, default='N')
+    created_by = models.IntegerField(null=False, blank=False)
+    created_date = models.DateTimeField(auto_now_add=True)
+    last_updated_by = models.IntegerField(null=False, blank=False)
+    last_updated_date = models.DateTimeField(auto_now=True)
+    delete_flag = models.CharField(max_length=1, null=False, blank=False, default='N')
+
+    class Meta:
+        db_table = "tb_sc_computation_details"

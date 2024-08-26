@@ -300,14 +300,14 @@ class scorecard_details_serializer(serializers.ModelSerializer):
         model = scorecard_details
         fields = ('id', 'scorecard_id', 'perspective_id',
                   'weight', 'weight_editable', 'created_by', 'last_updated_by')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=scorecard_details.objects.all(),
-                fields=['scorecard_id', 'perspective_id'],
-                message=(
-                    "The Fields scorecard_id, perspective_id must make a unique set.")
-            )
-        ]
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=scorecard_details.objects.all(),
+        #         fields=['scorecard_id', 'perspective_id'],
+        #         message=(
+        #             "The Fields scorecard_id, perspective_id must make a unique set.")
+        #     )
+        # ]
 
 # class perspective_with_scorecard_serializer(serializers.ModelSerializer):
 #     perspective_id = perspectives_serializer(many=True)
@@ -332,15 +332,15 @@ class business_goals_objectives_serializer(serializers.ModelSerializer):
         fields = ('id', 'scorecard_id', 'scorecard_details_id', 'objective_code',
                   'objective_description', 'weight', 'weight_editable', 'created_by', 'last_updated_by')
 
-        validators = [
-            UniqueTogetherValidator(
-                queryset=business_goals_objectives.objects.all(),
-                fields=['scorecard_id',
-                        'scorecard_details_id', 'objective_code'],
-                message=(
-                    "The Fields scorecard_id,scorecard_details_id , objective_code must make a unique set.")
-            )
-        ]
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=business_goals_objectives.objects.all(),
+        #         fields=['scorecard_id',
+        #                 'scorecard_details_id', 'objective_code'],
+        #         message=(
+        #             "The Fields scorecard_id,scorecard_details_id , objective_code must make a unique set.")
+        #     )
+        # ]
 
 
 # user_access_definition
@@ -357,17 +357,17 @@ class kpi_details_serializer(serializers.ModelSerializer):
     class Meta:
         model = kpi_details
         fields = ('id', 'perspective_id', 'objective_id', 'scorecard_details_id', 'scorecard_id', 'kpi_code', 'kpi', 'ytd', 'frequency', 'period_type', 'weight', 'weight_editable', 'measure',
-                  'baseline', 'target', 'min', 'max', 'optimization', 'chart_type', 'created_by', 'last_updated_by', 'created_date')
+            'baseline', 'target', 'min', 'max', 'optimization', 'chart_type', 'actual_type', 'created_by', 'last_updated_by', 'created_date')
         # 'performance','score',
-        validators = [
-            UniqueTogetherValidator(
-                queryset=kpi_details.objects.all(),
-                fields=['perspective_id', 'objective_id',
-                        'scorecard_id', 'kpi_code'],
-                message=(
-                    "The Fields Perspective Id, Objective Id,Scorecard Id,KPI Code must make a unique set.")
-            )
-        ]
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=kpi_details.objects.all(),
+        #         fields=['perspective_id', 'objective_id',
+        #                 'scorecard_id', 'kpi_code'],
+        #         message=(
+        #             "The Fields Perspective Id, Objective Id,Scorecard Id,KPI Code must make a unique set.")
+        #     )
+        # ]
 
 
 # KPI Actual Serializer
@@ -701,3 +701,10 @@ class state_serializer(serializers.ModelSerializer):
     class Meta:
         model = countries
         fields = '__all__'
+
+
+class computation_details_serailizer(serializers.ModelSerializer):
+
+    class Meta:
+        model = computation_details
+        fields = ('id', 'kpi_id', 'period_column', 'drill_down_value', 'computation_logic', 'value_type', 'sheet1', 'sheet2', 'filter_condition', 'no_of_sheets', 'url', 'user_name', 'Password', 'Computation_type', 'created_by', 'last_updated_by')

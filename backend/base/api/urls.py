@@ -231,6 +231,7 @@ urlpatterns = [
     path("get_scorecard_details", views.get_scorecard_details),
     path("upd_scorecard_details/<int:id>/", views.upd_scorecard_details),
     path("del_scorecard_details/<int:id>/", views.del_scorecard_details),
+    path("get_kpi_else_org_stop_light_indicators/<int:kpi_id>/", views.get_kpi_else_org_stop_light_indicators),
     # KPI Details URLS
     path("ins_kpi_details", views.ins_kpi_details),
     path("get_kpi_details", views.get_kpi_details),
@@ -467,5 +468,9 @@ urlpatterns = [
     path("get_state/<int:id>/",views.get_state),
     path("get_state",views.get_state),
     path("instant_scduler",updater.instant_jobs_scheduler),
+
+    path("get_sharepointData",views.get_sharepointData),
+    path("get_computational_details", views.get_computational_details),
+    path("chat_bot_index/_search", views._search),
         
 ]
